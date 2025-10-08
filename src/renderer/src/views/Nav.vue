@@ -8,7 +8,7 @@ const kindStore = useKindStore()
 
 onMounted(() => {
   categoryStore.fetchCategories()
-  kindStore.fetchKind()
+  kindStore.fetchKinds()
 })
 </script>
 

@@ -1,23 +1,43 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ItemDto } from '@renderer/dto/itemDto'
+import { onMounted, ref } from 'vue'
+import noImage from '/src/assets/no_img_square.png'
+
+const showImg = ref<string>(noImage)
+
+const props = defineProps<{
+  item: ItemDto
+}>()
+
+onMounted(() => {
+  const mainImg = props.item.mainImg
+  if (mainImg == null) return
+
+  const url = encodeURI(mainImg.realPath.replace(/\\/g, '/'))
+  showImg.value = 'file://' + url
+})
+</script>
 
 <template>
   <div class="main-box">
     <div class="top-box">
-      <img style="padding: 0; width: 100%" src="/src/assets/vue.svg" alt="" />
+      <div class="info-box">
+        <div>{{ props.item.title }}</div>
+      </div>
+      <img style="padding: 0; width: 100%;" :src="showImg" alt="" />
     </div>
 
     <div class="middle-box">
       <div class="categories-box">
-        <div v-for="i in 9" :key="i" class="category">category {{ i }}</div>
+        <div v-for="category in props.item.categories" :key="category.id!" class="category">
+          {{ category.name }}
+        </div>
       </div>
-      <div class="info-box">
-        <div>TITLE</div>
+      <div class="kind-box">
+        <div v-for="kind in props.item.kinds" :key="kind.id!" class="kind">{{ kind.name }}</div>
       </div>
     </div>
     <div class="bottom-box">
-      <div class="kind-box">
-        <div v-for="i in 8" :key="i" class="kind">KIND{{ i }}</div>
-      </div>
       <div class="control-box">
         <button style="background-color: #edc93d; flex-grow: 1" class="control-button">
           <icon-material-symbols-folder-outline />
@@ -33,9 +53,13 @@
 <style scoped>
 .main-box {
   width: 250px;
+  height: 100%;
   padding: 5px;
   border: 1px solid gainsboro;
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .top-box {
@@ -45,20 +69,29 @@
   overflow: hidden;
 }
 
+.middle-box {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-grow: 1;
+}
+
 .bottom-box {
 }
 
 .kind-box {
   display: flex;
   width: 100%;
-  overflow-x: scroll;
+  overflow-x: auto;
   gap: 5px;
 }
 
 .kind {
   background-color: #ff5e5e;
   border-radius: 10px;
-  padding: 5px;
+  padding: 3px;
+  color: white;
+  font-weight: 550;
 }
 
 .categories-box {

@@ -62,6 +62,15 @@ function createWindow(): void {
     return filePaths[0]
   })
 
+  ipcMain.handle('select-folder', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openDirectory']
+    })
+
+    if (canceled) return null
+    return filePaths[0]
+  })
+
   ipcMain.handle('select-file', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile']

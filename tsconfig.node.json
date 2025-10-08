@@ -5,7 +5,7 @@
     "src/main/**/*",
     "src/preload/**/*",
     "src/entity/*.ts",   // src 아래 모든 ts 파일 포함
-    "src/application/*.ts",
+    "src/application/**/*.ts",
     "src/infrastructure/*.ts",
     "src/domain/*.ts",
     "src/mapper/*.ts"

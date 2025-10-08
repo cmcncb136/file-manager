@@ -23,7 +23,6 @@ const closeItemAddModal = (): void => {
     style="
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-content: center;
       height: 100%;
     "

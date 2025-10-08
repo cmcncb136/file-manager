@@ -4,14 +4,18 @@ import noImage from '/src/assets/no_img.png'
 import { useCategoryStore } from '@renderer/stores/useCategoryStore'
 import { useKindStore } from '@renderer/stores/useKindStore'
 import { storeToRefs } from 'pinia'
+import { CategoryEntity } from '../../../../entity/categoryEntity'
+import { useItemStore } from '@renderer/stores/useItemStore'
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
+const itemStore = useItemStore()
 
 const { saveCategory } = categoryStore
 const { categories } = storeToRefs(categoryStore)
+const { saveItem } = itemStore
 
-kindStore.fetchKind()
+kindStore.fetchKinds()
 const { kinds } = storeToRefs(kindStore)
 
 const cancelBtnOverEnterHandler = (e: Event): void => {
@@ -27,7 +31,9 @@ const cancelBtnOverLeaveHandler = (e: Event): void => {
 const mainImg = ref<string>(noImage)
 const mainImgPath = ref<string | null>(null)
 
-const rootPath = ref<string | null>('')
+const rootPathInput = ref<HTMLInputElement>()
+const exePathInput = ref<HTMLInputElement>()
+const titleInput = ref<HTMLInputElement>()
 
 const mainImgLabel = ref()
 const MAIN_IMAGE_NULL_LABEL_MSG = 'Select Main Image'
@@ -35,13 +41,16 @@ const selectedKindList = ref<number[]>([])
 
 const modalBodyRight = ref<HTMLElement>()
 const categoryInputValue = ref<string>('')
+const selectedCategorySet = ref<Set<CategoryEntity>>(new Set<CategoryEntity>())
 
 const filteredCategoryList = computed(() => {
   const value = categoryInputValue.value
-  return categories.value.filter((it) => it.name.toLowerCase().includes(value.toLowerCase()))
+  return categories.value
+    .filter((it) => !selectedCategorySet.value.has(it))
+    .filter((it) => it.name.toLowerCase().includes(value.toLowerCase()))
 })
 
-watch(filteredCategoryList, async () => {
+watch(filteredCategoryList, async (): Promise<void> => {
   await nextTick()
   if (modalBodyRight.value) modalBodyRight.value.scrollTop = modalBodyRight.value.scrollHeight
 })
@@ -76,16 +85,68 @@ const addCategory = (category: string) => {
   saveCategory(categoryInputValue.value)
 }
 
-const findFileHandler = async (): Promise<void> => {
+const findFileHandler = async (target: HTMLInputElement | undefined): Promise<void> => {
   if (window.api) {
     const path = await window.api.selectFile()
-    if (!path) return
+    if (!path || !target) return
 
-    rootPath.value = path
+    target.value = path
   }
 }
 
-const saveHandler = () => {}
+const findFolderHandler = async (target: HTMLInputElement | undefined): Promise<void> => {
+  if (window.api) {
+    const path = await window.api.selectFolder()
+    if (!path || !target) return
+
+    target.value = path
+  }
+}
+
+const selectCategory = (category: CategoryEntity): void => {
+  if (selectedCategorySet.value.has(category)) return
+  selectedCategorySet.value.add(category)
+}
+
+const deselectCategory = (category: CategoryEntity): void => {
+  selectedCategorySet.value.delete(category)
+}
+
+const saveHandler = (): void => {
+  if (titleInput.value?.value.trim() === '') {
+    titleInput.value.value = ''
+    titleInput.value.focus()
+    return
+  }
+
+  let exePath: string | null = null
+  let rootPath: string | null = null
+
+  if (exePathInput.value && exePathInput.value?.value.trim() !== '')
+    exePath = exePathInput.value.value
+
+  if (rootPathInput.value && rootPathInput.value?.value.trim() !== '')
+    rootPath = rootPathInput.value.value
+
+  save(titleInput.value!.value!, mainImgPath.value, exePath, rootPath)
+}
+
+const save = async (
+  title: string,
+  mainImgPath: string | null,
+  exePath: string | null,
+  rootPath: string | null
+): Promise<void> => {
+  await saveItem({
+    title: title,
+    description: 'test',
+    mainImgPath: mainImgPath,
+    exeFileRefPath: exePath,
+    rootFileRefPath: rootPath,
+    categoryIds: [...selectedCategorySet.value].map((it) => it.id!),
+    kindIds: selectedKindList.value.values().toArray()
+  })
+}
 </script>
 
 <template>
@@ -119,14 +180,24 @@ const saveHandler = () => {}
         </div>
         <div class="modal-body-right">
           <div class="setting-right-box">
-            <input class="input-box" id="title" placeholder="title" type="text" />
+            <input ref="titleInput" class="input-box" id="title" placeholder="title" type="text" />
           </div>
-          <div class="setting-right-box" @click="findFileHandler">
+          <div class="setting-right-box" @click="findFolderHandler(rootPathInput)">
             <div style="display: flex; flex-direction: column; width: 100%">
-              <div>ROOT FILE(folder) :</div>
+              <div>Root Folder :</div>
               <div style="display: flex; width: 100%; gap: 5px">
-                <input disabled class="input-box" :value="rootPath" />
-                <button id="fileFindBtn">F</button>
+                <input ref="rootPathInput" disabled class="input-box" />
+                <button class="file-find-btn">F</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="setting-right-box" @click="findFileHandler(exePathInput)">
+            <div style="display: flex; flex-direction: column; width: 100%">
+              <div>EXE FILE :</div>
+              <div style="display: flex; width: 100%; gap: 5px">
+                <input ref="exePathInput" disabled class="input-box" />
+                <button class="file-find-btn">F</button>
               </div>
             </div>
           </div>
@@ -174,11 +245,26 @@ const saveHandler = () => {}
               <div class="category-select-box">
                 <div class="category-select-list-box">
                   [category list]
-                  <div v-for="(category, i) in filteredCategoryList" :key="i">
+                  <div
+                    class="category category-no-select"
+                    @click="selectCategory(category)"
+                    v-for="(category, i) in filteredCategoryList"
+                    :key="i"
+                  >
                     {{ category.name }}
                   </div>
                 </div>
-                <div class="category-selected-line-box">[selected list]</div>
+                <div class="category-selected-line-box">
+                  [selected list]
+                  <div
+                    class="category category-select"
+                    @click="deselectCategory(category)"
+                    v-for="(category, i) in selectedCategorySet"
+                    :key="i"
+                  >
+                    {{ category.name }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -186,7 +272,7 @@ const saveHandler = () => {}
       </div>
 
       <div class="modal-footer">
-        <button id="saveBtn">save</button>
+        <button id="saveBtn" @click="saveHandler">save</button>
       </div>
     </div>
   </div>
@@ -204,7 +290,7 @@ button:hover {
   font-size: small;
 }
 
-#fileFindBtn {
+.file-find-btn {
   background-color: #f0dc4e;
   margin: 0;
   padding: 0;
@@ -278,7 +364,7 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 
 .cancel-btn {
@@ -346,17 +432,23 @@ button:hover {
 }
 
 .kind-no-select:hover {
-  color: deepskyblue;
-  border: 1px solid deepskyblue;
+  color: #ff5e5e;
+  border: 1px solid #ff5e5e;
 }
 
 .category {
-  color: #3f3f3f;
-  border: 1px solid gainsboro;
-  border-radius: 10px;
-  padding: 5px;
-  font-weight: 550;
-  transition: 0.25s;
+  transition: 0.1s;
+  border-radius: 5px;
+}
+
+.category-no-select:hover {
+  color: white;
+  background-color: #008cff;
+}
+
+.category-select:hover {
+  color: white;
+  background-color: #ff5e5e;
 }
 
 .category-box {
@@ -371,14 +463,13 @@ button:hover {
   gap: 5px;
   padding-block: 5px;
   flex-direction: row;
-  flex-wrap: wrap;
   width: 100%;
 }
 
 .category-input {
-  padding: 5px;
   border-radius: 7px;
   border: 1px solid #ccc;
+  max-width: 94%;
   flex-grow: 1;
   margin-inline: 5px;
   font-size: medium;

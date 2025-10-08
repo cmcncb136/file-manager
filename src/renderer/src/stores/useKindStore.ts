@@ -6,12 +6,17 @@ export const useKindStore = defineStore('kind', () => {
   const kinds = ref<KindEntity[]>([])
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
+  const kindMap = ref<Map<number, KindEntity>>(new Map())
 
-  const fetchKind = async (): Promise<void> => {
+  const fetchKinds = async (): Promise<void> => {
     loading.value = true
 
     try {
       kinds.value = await window.api.callService('KindService', 'findAll')
+      kindMap.value.clear()
+      kinds.value.forEach((kind) => {
+        kindMap.value.set(kind.id!, kind)
+      })
     } catch (err) {
       if (err instanceof Error) {
         error.value = err.message
@@ -27,6 +32,7 @@ export const useKindStore = defineStore('kind', () => {
 
   return {
     kinds,
-    fetchKind
+    fetchKinds,
+    kindMap
   }
 })

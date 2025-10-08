@@ -10,7 +10,8 @@ export class ImageMappingService {
     @inject(FileService) private fileService: FileService
   ) {}
 
-  async findById(id: number): Promise<ImageMappingEntity | null> {
+  async findById(id: number | null): Promise<ImageMappingEntity | null> {
+    if (id == null) return null
     return this.imageMappingRepo.findById(id)
   }
 

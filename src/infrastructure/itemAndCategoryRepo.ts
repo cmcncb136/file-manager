@@ -15,6 +15,10 @@ export class ItemAndCategoryRepo {
     return await this.ItemAndCategoryRepository.save(ItemAndCategory)
   }
 
+  async saveAll(ItemAndCategories: ItemAndCategory[]): Promise<ItemAndCategory[]> {
+    return await this.ItemAndCategoryRepository.save(ItemAndCategories)
+  }
+
   async findByIds(ids: number[]): Promise<ItemAndCategory[]> {
     return await this.ItemAndCategoryRepository.findBy({ id: In(ids) })
   }

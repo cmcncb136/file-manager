@@ -5,13 +5,18 @@ import { ItemAndCategoryRepo } from '../infrastructure/itemAndCategoryRepo'
 import { Item } from '../domain/item'
 import { ItemMapper } from '../mapper/itemMapper'
 import { ItemAndCategory, ItemAndKind, ItemEntity } from '../entity/itemEntity'
+import { ItemWithPathRequestDto } from './dto/itemWithPathRequestDto'
+import { ImageMappingService } from './imageMappingService'
+import { FileRefService } from './fileRefService'
 
 @injectable()
 export class ItemService {
   constructor(
     @inject(ItemRepo) private itemRepo: ItemRepo,
     @inject(ItemAndKindRepo) private itemAndKindRepo: ItemAndKindRepo,
-    @inject(ItemAndCategoryRepo) private itemAndCategoryRepo: ItemAndCategoryRepo
+    @inject(ItemAndCategoryRepo) private itemAndCategoryRepo: ItemAndCategoryRepo,
+    @inject(ImageMappingService) private imageMappingService: ImageMappingService,
+    @inject(FileRefService) private fileRefService: FileRefService
   ) {}
 
   private createItem(
@@ -31,8 +36,43 @@ export class ItemService {
       return map
     }, new Map<number, number[]>())
 
-    return itemEntities.map((entity) =>
-      ItemMapper.toDomain(entity, categoryEntities[entity!.id!], kindEntities[entity!.id!])
+    const items = itemEntities.map((entity) =>
+      ItemMapper.toDomain(entity, categoryEntities.get(entity.id!)!, kindEntities.get(entity.id!)!)
+    )
+    console.log(JSON.stringify(items))
+    return items
+  }
+
+  async save(straightItem: string): Promise<Item> {
+    console.log('input : ', straightItem)
+    const item = JSON.parse(straightItem)
+
+    const itemEntity = await this.itemRepo.save(ItemMapper.toEntity(item))
+
+    const kindEntities = await this.itemAndKindRepo.saveAll(
+      item.kindIds.map((kindId) => {
+        return {
+          id: null,
+          itemId: itemEntity.id!,
+          kindId: kindId
+        }
+      })
+    )
+
+    const categoryEntities = await this.itemAndCategoryRepo.saveAll(
+      item.categoryIds.map((categoryId) => {
+        return {
+          id: null,
+          itemId: itemEntity.id!,
+          categoryId: categoryId
+        }
+      })
+    )
+
+    return ItemMapper.toDomain(
+      itemEntity,
+      categoryEntities.map((category) => category.categoryId),
+      kindEntities.map((kind) => kind.kindId)
     )
   }
 
@@ -44,6 +84,22 @@ export class ItemService {
     ])
 
     return this.createItem(itemEntities, kindEntities, categoryEntities)
+  }
+
+  async findItemWithPathAll(): Promise<ItemWithPathRequestDto[]> {
+    const items = await this.findAll()
+    const dtoPromise = items.map(async (item) => {
+      const [mainImg, exeFile, rootFile] = await Promise.all([
+        this.imageMappingService.findById(item.mainImgId),
+        this.fileRefService.findById(item.exeFileRefId),
+        this.fileRefService.findById(item.rootFileRefId)
+      ])
+
+      return ItemMapper.toItemWithPathRequestDto(item, mainImg, exeFile, rootFile)
+    })
+
+    const dtos = await Promise.all(dtoPromise)
+    return dtos.sort((a, b) => a.id - b.id)
   }
 
   async findById(id: number): Promise<Item | null> {
@@ -62,7 +118,7 @@ export class ItemService {
     )
   }
 
-  //Todo. 여기서부터 다시 시작
+  //Todo. 여기서부터 다시 시작 - Description
   async findByTitle(title: string): Promise<Item[]> {
     const itemEntities = await this.itemRepo.findByTitle(title)
     const [kindEntities, categoryEntities] = await Promise.all([

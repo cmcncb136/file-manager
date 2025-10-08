@@ -10,7 +10,8 @@ export class FileRefService {
     @inject(FileService) private fileService: FileService
   ) {}
 
-  async findById(id: number): Promise<FileRefEntity | null> {
+  async findById(id: number | null): Promise<FileRefEntity | null> {
+    if (id == null) return null
     return this.fileRefRepo.findById(id)
   }
 

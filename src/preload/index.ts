@@ -5,6 +5,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   selectImage: () => ipcRenderer.invoke('select-image'),
   selectFile: () => ipcRenderer.invoke('select-file'),
+  selectFolder: () => electron.ipcRenderer.invoke('select-folder'),
   callService: (service: string, method: string, payload?: never) =>
     electron.ipcRenderer.invoke('application-call', { service, method, payload })
 }
