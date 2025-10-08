@@ -24,26 +24,30 @@ onMounted(() => {
       <div class="info-box">
         <div>{{ props.item.title }}</div>
       </div>
-      <img style="padding: 0; width: 100%;" :src="showImg" alt="" />
+      <img style="padding: 0; width: 100%" :src="showImg" alt="" />
     </div>
 
     <div class="middle-box">
       <div class="categories-box">
-        <div v-for="category in props.item.categories" :key="category.id!" class="category">
+        <span v-for="category in props.item.categories" :key="category.id!" class="category">
           {{ category.name }}
-        </div>
+        </span>
       </div>
       <div class="kind-box">
         <div v-for="kind in props.item.kinds" :key="kind.id!" class="kind">{{ kind.name }}</div>
       </div>
     </div>
+    <hr />
     <div class="bottom-box">
       <div class="control-box">
         <button style="background-color: #edc93d; flex-grow: 1" class="control-button">
-          <icon-material-symbols-folder-outline />
+          <i class="pi pi-folder" />
+        </button>
+        <button style="background-color: #008cff" class="control-button">
+          <i class="pi pi-pencil" />
         </button>
         <button style="background-color: #ff5e5e" class="control-button">
-          <icon-material-symbols-edit-outline />
+          <i class="pi pi-trash" />
         </button>
       </div>
     </div>
@@ -100,9 +104,10 @@ onMounted(() => {
 
 .categories-box {
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
+  flex-grow: 1;
   justify-content: center;
+  align-items: flex-start;
   gap: 5px;
 }
 

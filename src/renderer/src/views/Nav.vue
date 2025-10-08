@@ -17,7 +17,7 @@ onMounted(() => {
     <div class="search-container">
       <input type="text" />
       <button class="search-button control-button">
-        <icon-material-symbols-tab-search-outline />
+        <i class="pi pi-search" />
       </button>
       <button class="add-button control-button" @click="$emit('openItemAddModal')">ADD</button>
     </div>
@@ -62,7 +62,6 @@ onMounted(() => {
   overflow-x: scroll;
   gap: 5px;
   height: 50px;
-
 }
 
 .category {
@@ -114,9 +113,10 @@ input {
 }
 
 .search-button {
-  background-color: #ff5e5e;
+  background-color: #008cff;
   aspect-ratio: 1;
   padding: 0;
+  color: white;
 }
 
 .add-button {

@@ -193,7 +193,9 @@ const save = async (
               <div>Root Folder :</div>
               <div style="display: flex; width: 100%; gap: 5px">
                 <input ref="rootPathInput" disabled class="input-box" />
-                <button class="file-find-btn">F</button>
+                <button class="file-find-btn">
+                  <i class="pi pi-folder" />
+                </button>
               </div>
             </div>
           </div>
@@ -203,7 +205,9 @@ const save = async (
               <div>EXE FILE :</div>
               <div style="display: flex; width: 100%; gap: 5px">
                 <input ref="exePathInput" disabled class="input-box" />
-                <button class="file-find-btn">F</button>
+                <button class="file-find-btn">
+                  <i class="pi pi-folder" />
+                </button>
               </div>
             </div>
           </div>
@@ -246,7 +250,9 @@ const save = async (
                   id="category-input"
                   placeholder="category filter and add"
                 />
-                <button class="category-add-btn">+</button>
+                <button class="category-add-btn">
+                  <i class="pi pi-search-plus" />
+                </button>
               </div>
               <div class="category-select-box">
                 <div class="category-select-list-box">
@@ -302,6 +308,7 @@ button:hover {
   padding: 0;
   aspect-ratio: 1;
   height: 2em;
+  color: white;
 }
 
 #saveBtn {
@@ -492,7 +499,7 @@ button:hover {
   font-weight: bold;
   padding-block: 5px;
   padding-inline: 10px;
-  font-size: large;
+  font-size: medium;
   color: white;
   aspect-ratio: 1;
 }
