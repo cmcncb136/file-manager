@@ -31,4 +31,11 @@ export class FileRefService {
       realPath: path
     })
   }
+
+  async openFileById(id: number): Promise<string | null> {
+    const entity = await this.findById(id)
+    if (!entity) return null
+
+    return await this.fileService.openLinkFile(entity.linkFilePath)
+  }
 }

@@ -53,4 +53,8 @@ export class FileService {
 
     return path.join(generatePath, copyFileName)
   }
+
+  async openLinkFile(fileName: string): Promise<string> {
+    return shell.openPath(path.join(this.appDataPath, fileName))
+  }
 }

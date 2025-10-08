@@ -18,7 +18,7 @@ onMounted(async () => {
 <template>
   <div class="main-container" @click="fetchItems">
     <div class="content-container">
-      <div class="item-container" v-for="item in items" :key="item.id!">
+      <div v-for="item in items" :key="item.id!" class="item-container">
         <ViewTemplate :item="item" />
       </div>
     </div>
