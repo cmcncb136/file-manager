@@ -9,6 +9,26 @@ const props = defineProps<{
   item: ItemDto
 }>()
 
+const openFile = (refFileEntityId: number | null | undefined): void => {
+  if (!refFileEntityId) return
+
+  if (window.api) {
+    const rst = window.api.callService('FileRefService', 'openFileById', [refFileEntityId])
+    console.log(rst)
+  }
+}
+
+const openFileHandler = (): void => {
+  if (props.item.exeFile) {
+    openFile(props.item.exeFile.id)
+    return
+  }
+
+  if (props.item.rootFile) {
+    openFile(props.item.rootFile.id)
+  }
+}
+
 onMounted(() => {
   const mainImg = props.item.mainImg
   if (mainImg == null) return
@@ -19,7 +39,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="main-box">
+  <div class="main-box" @click="openFileHandler">
     <div class="top-box">
       <div class="info-box">
         <div>{{ props.item.title }}</div>
@@ -40,7 +60,12 @@ onMounted(() => {
     <hr />
     <div class="bottom-box">
       <div class="control-box">
-        <button style="background-color: #edc93d; flex-grow: 1" class="control-button">
+        <button
+          style="background-color: #edc93d; flex-grow: 1"
+          class="control-button"
+          :disabled="!props.item.rootFile?.id"
+          @click.stop="() => openFile(props.item.rootFile?.id)"
+        >
           <i class="pi pi-folder" />
         </button>
         <button style="background-color: #008cff" class="control-button">
@@ -139,6 +164,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.control-button:disabled {
+  filter: brightness(0.5);
+  background-color: #4f482c;
 }
 
 button:hover {
