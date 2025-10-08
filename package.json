@@ -27,6 +27,7 @@
     "@iconify/vue": "^5.0.0",
     "electron-updater": "^6.3.9",
     "pinia": "^3.0.3",
+    "primeicons": "^7.0.0",
     "reflect-metadata": "^0.2.2",
     "sqlite3": "^5.1.7",
     "tsyringe": "^4.10.0",

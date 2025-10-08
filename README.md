@@ -8,6 +8,9 @@ An Electron application with Vue and TypeScript
 
 ## Project Setup
 
+## Icon
+- [Primevue](https://primevue.org/icons/)
+
 ### Install
 
 ```bash
