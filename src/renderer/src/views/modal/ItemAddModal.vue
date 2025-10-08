@@ -7,8 +7,11 @@ import { storeToRefs } from 'pinia'
 import { CategoryEntity } from '../../../../entity/categoryEntity'
 import { useItemStore } from '@renderer/stores/useItemStore'
 import { Item } from '../../../../domain/item'
+import CategorySelectBox from '@renderer/components/CategorySelectBox.vue'
 
-const emit = defineEmits('closeItemAddModal')
+const emit = defineEmits<{
+  (e: 'closeItemAddModal'): void
+}>()
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
@@ -46,17 +49,12 @@ const modalBodyRight = ref<HTMLElement>()
 const categoryInputValue = ref<string>('')
 const selectedCategorySet = ref<Set<CategoryEntity>>(new Set<CategoryEntity>())
 
-const filteredCategoryList = computed(() => {
-  const value = categoryInputValue.value
-  return categories.value
-    .filter((it) => !selectedCategorySet.value.has(it))
-    .filter((it) => it.name.toLowerCase().includes(value.toLowerCase()))
-})
-
-watch(filteredCategoryList, async (): Promise<void> => {
-  await nextTick()
-  if (modalBodyRight.value) modalBodyRight.value.scrollTop = modalBodyRight.value.scrollHeight
-})
+const moveBottomScroll = async () => {
+  if (modalBodyRight.value) {
+    console.log('height : ' + modalBodyRight.value.scrollHeight)
+    modalBodyRight.value.scrollTop = modalBodyRight.value.scrollHeight
+  }
+}
 
 watch(mainImgPath, () => {
   if (!mainImgPath.value) mainImgLabel.value.innerHTML = MAIN_IMAGE_NULL_LABEL_MSG
@@ -75,10 +73,6 @@ const selectFileHandler = async () => {
   } else {
     console.log('Electron API not available')
   }
-}
-
-const addCategoryHandler = () => {
-  addCategory(categoryInputValue.value)
 }
 
 const addCategory = (category: string) => {
@@ -130,7 +124,7 @@ const saveHandler = (): void => {
   if (rootPathInput.value && rootPathInput.value?.value.trim() !== '')
     rootPath = rootPathInput.value.value
 
-  save(titleInput.value!.value!, mainImgPath.value, exePath, rootPath).then(item => {
+  save(titleInput.value!.value!, mainImgPath.value, exePath, rootPath).then((item) => {
     if (item != null) emit('closeItemAddModal')
   })
 
@@ -168,7 +162,7 @@ const save = async (
       </div>
 
       <div class="modal-body">
-        <div ref="modalBodyRight" class="modal-body-left">
+        <div class="modal-body-left">
           <div style="border-radius: 10px; overflow: hidden; border: 1px gainsboro solid">
             <img
               @click="selectFileHandler"
@@ -184,7 +178,7 @@ const save = async (
             </button>
           </div>
         </div>
-        <div class="modal-body-right">
+        <div ref="modalBodyRight" class="modal-body-right">
           <div class="setting-right-box">
             <input ref="titleInput" class="input-box" id="title" placeholder="title" type="text" />
           </div>
@@ -239,46 +233,14 @@ const save = async (
           </div>
 
           <div class="setting-right-box">
-            <div class="category-box">
-              <div>categories</div>
-              <div class="category-input-box">
-                <input
-                  v-model="categoryInputValue"
-                  @keyup.enter="addCategoryHandler"
-                  type="text"
-                  class="category-input"
-                  id="category-input"
-                  placeholder="category filter and add"
-                />
-                <button class="category-add-btn">
-                  <i class="pi pi-search-plus" />
-                </button>
-              </div>
-              <div class="category-select-box">
-                <div class="category-select-list-box">
-                  [category list]
-                  <div
-                    class="category category-no-select"
-                    @click="selectCategory(category)"
-                    v-for="(category, i) in filteredCategoryList"
-                    :key="i"
-                  >
-                    {{ category.name }}
-                  </div>
-                </div>
-                <div class="category-selected-line-box">
-                  [selected list]
-                  <div
-                    class="category category-select"
-                    @click="deselectCategory(category)"
-                    v-for="(category, i) in selectedCategorySet"
-                    :key="i"
-                  >
-                    {{ category.name }}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CategorySelectBox
+              :categories="categories"
+              :selected-category-set="selectedCategorySet"
+              @add-category="addCategory"
+              @select-category="selectCategory"
+              @deselect-category="deselectCategory"
+              @move-bottom-scroll="moveBottomScroll"
+            />
           </div>
         </div>
       </div>
@@ -329,6 +291,7 @@ button:hover {
   justify-content: center;
   top: 0;
   left: 0;
+  z-index: 100;
 }
 
 .modal-content {
@@ -447,78 +410,5 @@ button:hover {
 .kind-no-select:hover {
   color: #ff5e5e;
   border: 1px solid #ff5e5e;
-}
-
-.category {
-  transition: 0.1s;
-  border-radius: 5px;
-}
-
-.category-no-select:hover {
-  color: white;
-  background-color: #008cff;
-}
-
-.category-select:hover {
-  color: white;
-  background-color: #ff5e5e;
-}
-
-.category-box {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-}
-
-.category-input-box {
-  display: flex;
-  gap: 5px;
-  padding-block: 5px;
-  flex-direction: row;
-  width: 100%;
-}
-
-.category-input {
-  border-radius: 7px;
-  border: 1px solid #ccc;
-  max-width: 94%;
-  flex-grow: 1;
-  margin-inline: 5px;
-  font-size: medium;
-}
-
-.category-select-box {
-  display: flex;
-  width: 100%;
-  text-align: center;
-}
-
-.category-add-btn {
-  background-color: rgb(255, 94, 94);
-  font-weight: bold;
-  padding-block: 5px;
-  padding-inline: 10px;
-  font-size: medium;
-  color: white;
-  aspect-ratio: 1;
-}
-
-.category-select-list-box {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  width: 50%;
-  margin: 5px;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.category-selected-line-box {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  width: 50%;
-  margin: 5px;
-  max-height: 300px;
-  overflow-y: auto;
 }
 </style>
