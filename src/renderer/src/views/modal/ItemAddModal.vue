@@ -6,6 +6,9 @@ import { useKindStore } from '@renderer/stores/useKindStore'
 import { storeToRefs } from 'pinia'
 import { CategoryEntity } from '../../../../entity/categoryEntity'
 import { useItemStore } from '@renderer/stores/useItemStore'
+import { Item } from '../../../../domain/item'
+
+const emit = defineEmits('closeItemAddModal')
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
@@ -67,7 +70,6 @@ const selectFileHandler = async () => {
     if (!path) return
 
     mainImgPath.value = path
-    // await window.api.callService('ImageMappingService', 'saveByPath', [path])
     const url = encodeURI(path.replace(/\\/g, '/'))
     mainImg.value = 'file://' + url
   } else {
@@ -128,7 +130,11 @@ const saveHandler = (): void => {
   if (rootPathInput.value && rootPathInput.value?.value.trim() !== '')
     rootPath = rootPathInput.value.value
 
-  save(titleInput.value!.value!, mainImgPath.value, exePath, rootPath)
+  save(titleInput.value!.value!, mainImgPath.value, exePath, rootPath).then(item => {
+    if (item != null) emit('closeItemAddModal')
+  })
+
+  //Todo. 연속 저장 방지 칠요할 수도 있음
 }
 
 const save = async (
@@ -136,8 +142,8 @@ const save = async (
   mainImgPath: string | null,
   exePath: string | null,
   rootPath: string | null
-): Promise<void> => {
-  await saveItem({
+): Promise<Item | null> => {
+  return await saveItem({
     title: title,
     description: 'test',
     mainImgPath: mainImgPath,

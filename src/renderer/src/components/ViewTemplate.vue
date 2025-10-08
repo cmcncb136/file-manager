@@ -62,6 +62,10 @@ onMounted(() => {
   gap: 5px;
 }
 
+.main-box:hover {
+  border: 2px solid cornflowerblue;
+}
+
 .top-box {
   width: 100%;
   aspect-ratio: 1;
