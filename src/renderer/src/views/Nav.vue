@@ -2,9 +2,13 @@
 import { useCategoryStore } from '@renderer/stores/useCategoryStore'
 import { onMounted } from 'vue'
 import { useKindStore } from '@renderer/stores/useKindStore'
+import { useModalStore } from '@renderer/stores/useModalStore'
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
+const modalStore = useModalStore()
+
+const { open } = modalStore
 
 onMounted(() => {
   categoryStore.fetchCategories()
@@ -19,7 +23,7 @@ onMounted(() => {
       <button class="search-button control-button">
         <i class="pi pi-search" />
       </button>
-      <button class="add-button control-button" @click="$emit('openItemAddModal')">ADD</button>
+      <button class="add-button control-button" @click="open('addItem')">ADD</button>
     </div>
     <div class="control-container">
       <div class="kind-container">

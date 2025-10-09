@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, Ref, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { CategoryEntity } from '../../../entity/categoryEntity'
 
 const props = defineProps<{
-  categories: Ref<CategoryEntity[]>
-  selectedCategorySet: Ref<Set<CategoryEntity>>
+  categories: CategoryEntity[]
+  selectedCategorySet: Set<CategoryEntity>
 }>()
 
 const emit = defineEmits<{
@@ -41,7 +41,7 @@ watch(filteredCategoryList, async (): Promise<void> => {
         type="text"
         class="category-input"
         placeholder="category filter and add"
-        @keyup.enter="$emit('addCategory')"
+        @keyup.enter="$emit('addCategory', categoryInputValue)"
       />
       <button class="category-add-btn">
         <i class="pi pi-search-plus" />

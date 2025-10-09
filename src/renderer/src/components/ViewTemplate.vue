@@ -2,9 +2,12 @@
 import { ItemDto } from '@renderer/dto/itemDto'
 import { onMounted, ref } from 'vue'
 import noImage from '/src/assets/no_img_square.png'
+import { useModalStore } from '@renderer/stores/useModalStore'
+
+const modalStore = useModalStore()
+const { open } = modalStore
 
 const showImg = ref<string>(noImage)
-
 const props = defineProps<{
   item: ItemDto
 }>()
@@ -68,7 +71,11 @@ onMounted(() => {
         >
           <i class="pi pi-folder" />
         </button>
-        <button style="background-color: #008cff" class="control-button">
+        <button
+          style="background-color: #008cff"
+          class="control-button"
+          @click.stop="open('editItem', props.item)"
+        >
           <i class="pi pi-pencil" />
         </button>
         <button style="background-color: #ff5e5e" class="control-button">

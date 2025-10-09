@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import noImage from '/src/assets/no_img.png'
 import { useCategoryStore } from '@renderer/stores/useCategoryStore'
 import { useKindStore } from '@renderer/stores/useKindStore'
@@ -8,9 +8,14 @@ import { CategoryEntity } from '../../../../entity/categoryEntity'
 import { useItemStore } from '@renderer/stores/useItemStore'
 import { Item } from '../../../../domain/item'
 import CategorySelectBox from '@renderer/components/CategorySelectBox.vue'
+import { ItemDto } from '@renderer/dto/itemDto'
 
 const emit = defineEmits<{
   (e: 'closeItemAddModal'): void
+}>()
+
+const props = defineProps<{
+  item?: ItemDto
 }>()
 
 const categoryStore = useCategoryStore()
@@ -18,7 +23,7 @@ const kindStore = useKindStore()
 const itemStore = useItemStore()
 
 const { saveCategory } = categoryStore
-const { categories } = storeToRefs(categoryStore)
+const { categories, categoryMap } = storeToRefs(categoryStore)
 const { saveItem } = itemStore
 
 kindStore.fetchKinds()
@@ -43,17 +48,35 @@ const titleInput = ref<HTMLInputElement>()
 
 const mainImgLabel = ref()
 const MAIN_IMAGE_NULL_LABEL_MSG = 'Select Main Image'
-const selectedKindList = ref<number[]>([])
+const selectedKindList = ref<number[]>(props.item?.kinds.map((it) => it.id!) ?? [])
 
 const modalBodyRight = ref<HTMLElement>()
 const categoryInputValue = ref<string>('')
 const selectedCategorySet = ref<Set<CategoryEntity>>(new Set<CategoryEntity>())
 
-const moveBottomScroll = async () => {
-  if (modalBodyRight.value) {
-    console.log('height : ' + modalBodyRight.value.scrollHeight)
-    modalBodyRight.value.scrollTop = modalBodyRight.value.scrollHeight
+onMounted(async () => {
+  const item = props.item
+  if (!item) return
+
+  if (item.mainImg) {
+    mainImgPath.value = item.mainImg.realPath
+    const url = encodeURI(mainImgPath.value.replace(/\\/g, '/'))
+    mainImg.value = 'file://' + url
   }
+
+  item.categories.forEach((category) => {
+    if (categoryMap.value.has(category.id!)) {
+      selectedCategorySet.value.add(categoryMap.value.get(category.id!)!)
+    }
+  })
+
+  if (item.title && titleInput.value) titleInput.value.value = item.title
+  if (item.exeFile && exePathInput.value) exePathInput.value.value = item.exeFile.realPath
+  if (item.rootFile && rootPathInput.value) rootPathInput.value.value = item.rootFile.realPath
+})
+
+const moveBottomScroll = async () => {
+  if (modalBodyRight.value) modalBodyRight.value.scrollTop = modalBodyRight.value.scrollHeight
 }
 
 watch(mainImgPath, () => {
@@ -165,10 +188,10 @@ const save = async (
         <div class="modal-body-left">
           <div style="border-radius: 10px; overflow: hidden; border: 1px gainsboro solid">
             <img
-              @click="selectFileHandler"
-              style="max-height: 30vh; width: 15vw"
               :src="mainImg"
-              alt=""
+              style="max-height: 30vh; width: 15vw"
+              @click="selectFileHandler"
+              alt="main image"
             />
           </div>
 
@@ -214,8 +237,8 @@ const save = async (
                   <input
                     v-model="selectedKindList"
                     type="checkbox"
-                    :value="kind.id!"
                     :id="String(kind.id!)"
+                    :value="kind.id!"
                     hidden
                   />
                   <label
