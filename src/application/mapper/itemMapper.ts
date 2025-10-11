@@ -1,8 +1,9 @@
-import { ItemEntity } from '../entity/itemEntity'
-import { Item } from '../domain/item'
-import { FileRefEntity } from '../entity/fileRefEntity'
-import { ImageMappingEntity } from '../entity/imageMappingEntity'
-import { ItemWithPathRequestDto } from '../application/dto/itemWithPathRequestDto'
+import { ItemEntity } from '../../entity/itemEntity'
+import { Item } from '../../domain/item'
+import { FileRefEntity } from '../../entity/fileRefEntity'
+import { ImageMappingEntity } from '../../entity/imageMappingEntity'
+import { ItemWithPathRequestDto } from '../dto/itemWithPathRequestDto'
+import { SaveItemDto } from '../dto/saveItemDto'
 
 export class ItemMapper {
   static toDomain(
@@ -21,6 +22,25 @@ export class ItemMapper {
       categoryIds: categoryIds ? categoryIds : [],
       kindIds: kindIds ? kindIds : []
     }
+  }
+
+  static saveItemDtoToDomain(
+    saveItemDto: SaveItemDto,
+    imageMappingEntity: ImageMappingEntity | null,
+    exeFileRefEntity: FileRefEntity | null,
+    rootFileRefEntity: FileRefEntity | null
+  ): Item {
+    return {
+      id: null,
+      title: saveItemDto.title,
+      description: saveItemDto.description,
+      mainImgId: imageMappingEntity?.id ?? null,
+      exeFileRefId: exeFileRefEntity?.id ?? null,
+      rootFileRefId: rootFileRefEntity?.id ?? null,
+      deleted: false,
+      categoryIds: saveItemDto.categoryIds,
+      kindIds: saveItemDto.kindIds
+    } as Item
   }
 
   static toEntity(item: Item): ItemEntity {

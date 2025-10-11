@@ -8,7 +8,7 @@
     "src/application/**/*.ts",
     "src/infrastructure/*.ts",
     "src/domain/*.ts",
-    "src/mapper/*.ts"
+    "src/application/mapper/*.ts"
   ],
   "compilerOptions": {
     "composite": true,

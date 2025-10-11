@@ -3,11 +3,12 @@ import { ItemRepo } from '../infrastructure/itemRepo'
 import { ItemAndKindRepo } from '../infrastructure/itemAndKind'
 import { ItemAndCategoryRepo } from '../infrastructure/itemAndCategoryRepo'
 import { Item } from '../domain/item'
-import { ItemMapper } from '../mapper/itemMapper'
 import { ItemAndCategory, ItemAndKind, ItemEntity } from '../entity/itemEntity'
 import { ItemWithPathRequestDto } from './dto/itemWithPathRequestDto'
 import { ImageMappingService } from './imageMappingService'
 import { FileRefService } from './fileRefService'
+import { SaveItemDto } from './dto/saveItemDto'
+import { ItemMapper } from './mapper/itemMapper'
 
 @injectable()
 export class ItemService {
@@ -43,10 +44,29 @@ export class ItemService {
     return items
   }
 
-  async save(straightItem: string): Promise<Item> {
-    console.log('input : ', straightItem)
-    const item = JSON.parse(straightItem)
+  async saveRaw(straightItem: string): Promise<Item> {
+    const saveItemDto = JSON.parse(straightItem) as SaveItemDto
+    const [imageMapping, exeFileRef, rootFileRef] = await Promise.all([
+      saveItemDto.mainImgPath ? this.imageMappingService.saveByPath(saveItemDto.mainImgPath) : null,
+      saveItemDto.exeFileRefPath
+        ? this.fileRefService.saveByPath(saveItemDto.exeFileRefPath)
+        : null,
+      saveItemDto.rootFileRefPath
+        ? this.fileRefService.saveByPath(saveItemDto.rootFileRefPath)
+        : null
+    ])
 
+    return this.create(
+      ItemMapper.saveItemDtoToDomain(saveItemDto, imageMapping, exeFileRef, rootFileRef)
+    )
+  }
+
+  async save(straightItem: string): Promise<Item> {
+    const item = JSON.parse(straightItem) as Item
+    return await this.create(item)
+  }
+
+  private async create(item: Item): Promise<Item> {
     const itemEntity = await this.itemRepo.save(ItemMapper.toEntity(item))
 
     const kindEntities = await this.itemAndKindRepo.saveAll(
@@ -100,6 +120,19 @@ export class ItemService {
 
     const dtos = await Promise.all(dtoPromise)
     return dtos.sort((a, b) => a.id - b.id)
+  }
+
+  async findItemWithPathById(id: number): Promise<ItemWithPathRequestDto | null> {
+    const item = await this.findById(id)
+    if (!item) return null
+
+    const [mainImg, exeFile, rootFile] = await Promise.all([
+      this.imageMappingService.findById(item.mainImgId),
+      this.fileRefService.findById(item.exeFileRefId),
+      this.fileRefService.findById(item.rootFileRefId)
+    ])
+
+    return ItemMapper.toItemWithPathRequestDto(item, mainImg, exeFile, rootFile)
   }
 
   async findById(id: number): Promise<Item | null> {

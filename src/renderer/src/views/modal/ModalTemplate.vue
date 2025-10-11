@@ -24,7 +24,7 @@ defineEmits<{
           @click.stop="$emit('closeItemAddModal')"
         />
       </div>
-      <slot/>
+      <slot />
     </div>
   </div>
 </template>

@@ -4,11 +4,8 @@ import { Item } from '../../../domain/item'
 import { useCategoryStore } from '@renderer/stores/useCategoryStore'
 import { useKindStore } from '@renderer/stores/useKindStore'
 import { SaveItemDto } from '@renderer/dto/saveItemDto'
-import { ImageMappingEntity } from '../../../entity/imageMappingEntity'
-import { FileRefEntity } from '../../../entity/fileRefEntity'
 import { ItemDto } from '@renderer/dto/itemDto'
 import { ItemWithPathRequestDto } from '@renderer/dto/itemWithPathRequestDto'
-import { ItemMapper } from '@renderer/mapper/itemMapper'
 
 export const useItemStore = defineStore('item', () => {
   const rawItems = ref<ItemWithPathRequestDto[]>([])
@@ -66,41 +63,14 @@ export const useItemStore = defineStore('item', () => {
 
   const saveItem = async (saveItem: SaveItemDto): Promise<Item | null> => {
     try {
-      let imageMapping: null | ImageMappingEntity = null
-      let exeFileRef: null | FileRefEntity = null
-      let rootFileRef: null | FileRefEntity = null
-
-      if (saveItem.mainImgPath)
-        imageMapping = (await window.api.callService('ImageMappingService', 'saveByPath', [
-          saveItem.mainImgPath
-        ])) as ImageMappingEntity
-
-      if (saveItem.exeFileRefPath)
-        exeFileRef = (await window.api.callService('FileRefService', 'saveByPath', [
-          saveItem.exeFileRefPath
-        ])) as FileRefEntity
-
-      if (saveItem.rootFileRefPath)
-        rootFileRef = (await window.api.callService('FileRefService', 'saveByPath', [
-          saveItem.rootFileRefPath
-        ])) as FileRefEntity
-
-      const item = await window.api.callService('ItemService', 'save', [
-        JSON.stringify({
-          id: null,
-          title: saveItem.title,
-          description: saveItem.description,
-          mainImgId: imageMapping?.id,
-          exeFileRefId: exeFileRef?.id,
-          rootFileRefId: rootFileRef?.id,
-          deleted: false,
-          categoryIds: saveItem.categoryIds,
-          kindIds: saveItem.kindIds
-        })
-      ])
+      const item = (await window.api.callService('ItemService', 'saveRaw', [
+        JSON.stringify(saveItem)
+      ])) as Item
 
       rawItems.value.push(
-        ItemMapper.toItemWithPathRequestDto(item, imageMapping, exeFileRef, rootFileRef)
+        (await window.api.callService('ItemService', 'findItemWithPathById', [
+          item.id
+        ])) as ItemWithPathRequestDto
       )
 
       return item
