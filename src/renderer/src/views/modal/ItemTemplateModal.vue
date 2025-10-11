@@ -9,9 +9,11 @@ import { useItemStore } from '@renderer/stores/useItemStore'
 import { Item } from '../../../../domain/item'
 import CategorySelectBox from '@renderer/components/CategorySelectBox.vue'
 import { ItemDto } from '@renderer/dto/itemDto'
+import ModalTemplate from '@renderer/views/modal/ModalTemplate.vue'
 
 const emit = defineEmits<{
   (e: 'closeItemAddModal'): void
+  (e: 'submit'): ItemDto
 }>()
 
 const props = defineProps<{
@@ -28,16 +30,6 @@ const { saveItem } = itemStore
 
 kindStore.fetchKinds()
 const { kinds } = storeToRefs(kindStore)
-
-const cancelBtnOverEnterHandler = (e: Event): void => {
-  const target = e.target as HTMLInputElement
-  target.innerHTML = 'X'
-}
-
-const cancelBtnOverLeaveHandler = (e: Event): void => {
-  const target = e.target as HTMLInputElement
-  target.innerHTML = ''
-}
 
 const mainImg = ref<string>(noImage)
 const mainImgPath = ref<string | null>(null)
@@ -131,7 +123,7 @@ const deselectCategory = (category: CategoryEntity): void => {
   selectedCategorySet.value.delete(category)
 }
 
-const saveHandler = (): void => {
+const submitHandler = (): void => {
   if (titleInput.value?.value.trim() === '') {
     titleInput.value.value = ''
     titleInput.value.focus()
@@ -173,106 +165,95 @@ const save = async (
 </script>
 
 <template>
-  <div class="background" @scroll.stop="" @click="$emit('closeItemAddModal')">
-    <div class="modal-content" @click.stop="">
-      <div class="modal-header">
-        <button
-          class="cancel-btn"
-          @mouseenter="cancelBtnOverEnterHandler($event)"
-          @mouseleave="cancelBtnOverLeaveHandler($event)"
-          @click.stop="$emit('closeItemAddModal')"
-        />
-      </div>
-
-      <div class="modal-body">
-        <div class="modal-body-left">
-          <div style="border-radius: 10px; overflow: hidden; border: 1px gainsboro solid">
-            <img
-              :src="mainImg"
-              style="max-height: 30vh; width: 15vw"
-              @click="selectFileHandler"
-              alt="main image"
-            />
-          </div>
-
-          <div class="setting-left-box">
-            <button @click="selectFileHandler" ref="mainImgLabel" class="input-file-main-image">
-              {{ MAIN_IMAGE_NULL_LABEL_MSG }}
-            </button>
-          </div>
+  <ModalTemplate @close-item-add-modal="$emit('closeItemAddModal')">
+    <div class="modal-body">
+      <div class="modal-body-left">
+        <div style="border-radius: 10px; overflow: hidden; border: 1px gainsboro solid">
+          <img
+            :src="mainImg"
+            style="max-height: 30vh; width: 15vw"
+            @click="selectFileHandler"
+            alt="main image"
+          />
         </div>
-        <div ref="modalBodyRight" class="modal-body-right">
-          <div class="setting-right-box">
-            <input ref="titleInput" class="input-box" id="title" placeholder="title" type="text" />
-          </div>
-          <div class="setting-right-box" @click="findFolderHandler(rootPathInput)">
-            <div style="display: flex; flex-direction: column; width: 100%">
-              <div>Root Folder :</div>
-              <div style="display: flex; width: 100%; gap: 5px">
-                <input ref="rootPathInput" disabled class="input-box" />
-                <button class="file-find-btn">
-                  <i class="pi pi-folder" />
-                </button>
-              </div>
-            </div>
-          </div>
 
-          <div class="setting-right-box" @click="findFileHandler(exePathInput)">
-            <div style="display: flex; flex-direction: column; width: 100%">
-              <div>EXE FILE :</div>
-              <div style="display: flex; width: 100%; gap: 5px">
-                <input ref="exePathInput" disabled class="input-box" />
-                <button class="file-find-btn">
-                  <i class="pi pi-folder" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="setting-right-box">
-            <div class="kind-box">
-              <div>kinds</div>
-              <div class="kind-line-box">
-                <div v-for="kind in kinds" :key="kind.id!">
-                  <input
-                    v-model="selectedKindList"
-                    type="checkbox"
-                    :id="String(kind.id!)"
-                    :value="kind.id!"
-                    hidden
-                  />
-                  <label
-                    :class="{
-                      'kind-select': selectedKindList.includes(kind.id!),
-                      'kind-no-select': !selectedKindList.includes(kind.id!)
-                    }"
-                    class="kind"
-                    :for="String(kind.id!)"
-                    >{{ kind.name }}</label
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="setting-right-box">
-            <CategorySelectBox
-              :categories="categories"
-              :selected-category-set="selectedCategorySet"
-              @add-category="addCategory"
-              @select-category="selectCategory"
-              @deselect-category="deselectCategory"
-              @move-bottom-scroll="moveBottomScroll"
-            />
-          </div>
+        <div class="setting-left-box">
+          <button @click="selectFileHandler" ref="mainImgLabel" class="input-file-main-image">
+            {{ MAIN_IMAGE_NULL_LABEL_MSG }}
+          </button>
         </div>
       </div>
+      <div ref="modalBodyRight" class="modal-body-right">
+        <div class="setting-right-box">
+          <input ref="titleInput" class="input-box" id="title" placeholder="title" type="text" />
+        </div>
+        <div class="setting-right-box" @click="findFolderHandler(rootPathInput)">
+          <div style="display: flex; flex-direction: column; width: 100%">
+            <div>Root Folder :</div>
+            <div style="display: flex; width: 100%; gap: 5px">
+              <input ref="rootPathInput" disabled class="input-box" />
+              <button class="file-find-btn">
+                <i class="pi pi-folder" />
+              </button>
+            </div>
+          </div>
+        </div>
 
-      <div class="modal-footer">
-        <button id="saveBtn" @click="saveHandler">save</button>
+        <div class="setting-right-box" @click="findFileHandler(exePathInput)">
+          <div style="display: flex; flex-direction: column; width: 100%">
+            <div>EXE FILE :</div>
+            <div style="display: flex; width: 100%; gap: 5px">
+              <input ref="exePathInput" disabled class="input-box" />
+              <button class="file-find-btn">
+                <i class="pi pi-folder" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-right-box">
+          <div class="kind-box">
+            <div>kinds</div>
+            <div class="kind-line-box">
+              <div v-for="kind in kinds" :key="kind.id!">
+                <input
+                  v-model="selectedKindList"
+                  type="checkbox"
+                  :id="String(kind.id!)"
+                  :value="kind.id!"
+                  hidden
+                />
+                <label
+                  :class="{
+                    'kind-select': selectedKindList.includes(kind.id!),
+                    'kind-no-select': !selectedKindList.includes(kind.id!)
+                  }"
+                  class="kind"
+                  :for="String(kind.id!)"
+                  >{{ kind.name }}</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-right-box">
+          <CategorySelectBox
+            :categories="categories"
+            :selected-category-set="selectedCategorySet"
+            @add-category="addCategory"
+            @select-category="selectCategory"
+            @deselect-category="deselectCategory"
+            @move-bottom-scroll="moveBottomScroll"
+          />
+        </div>
       </div>
     </div>
-  </div>
+
+    <div class="modal-footer">
+      <button id="saveBtn" @click="submitHandler">save</button>
+    </div>
+  </ModalTemplate>
 </template>
 
 <style scoped>
@@ -304,37 +285,6 @@ button:hover {
   flex-grow: 1;
 }
 
-.background {
-  background-color: rgba(0, 0, 0, 0.25);
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  top: 0;
-  left: 0;
-  z-index: 100;
-}
-
-.modal-content {
-  background-color: white;
-  display: flex;
-  width: 60vw;
-  min-width: 600px;
-  height: 60vh;
-  border-radius: 20px;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: right;
-  align-items: flex-start;
-  padding: 10px;
-}
-
 .modal-footer {
   display: flex;
   justify-content: center;
@@ -364,18 +314,6 @@ button:hover {
   flex-direction: column;
   align-items: flex-start;
   overflow-y: scroll;
-}
-
-.cancel-btn {
-  margin: 0;
-  border-radius: 50px;
-  aspect-ratio: 1;
-  width: 20px;
-  background-color: #ff5e5e;
-  font-size: 10px;
-  padding: 0;
-  color: #2c2c2c;
-  font-weight: 600;
 }
 
 .setting-right-box {
