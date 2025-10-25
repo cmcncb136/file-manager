@@ -38,4 +38,9 @@ export class FileRefService {
 
     return await this.fileService.openLinkFile(entity.linkFilePath)
   }
+
+  async deleteById(id: number | null): Promise<void> {
+    if (id == null) return
+    await this.fileRefRepo.deleteById(id)
+  }
 }

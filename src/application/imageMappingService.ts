@@ -31,4 +31,9 @@ export class ImageMappingService {
       copyPath: copyPath
     })
   }
+
+  async deleteById(id: number | null): Promise<void> {
+    if (id == null) return
+    await this.imageMappingRepo.deleteById(id)
+  }
 }

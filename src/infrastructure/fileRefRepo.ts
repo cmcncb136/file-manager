@@ -26,4 +26,8 @@ export class FileRefRepo {
   async findAll(): Promise<FileRefEntity[]> {
     return await this.fileRefRepository.find()
   }
+
+  async deleteById(id: number): Promise<void> {
+    await this.fileRefRepository.delete({ id: id })
+  }
 }

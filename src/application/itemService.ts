@@ -9,6 +9,7 @@ import { ImageMappingService } from './imageMappingService'
 import { FileRefService } from './fileRefService'
 import { SaveItemDto } from './dto/saveItemDto'
 import { ItemMapper } from './mapper/itemMapper'
+import { UpdateItemDto } from './dto/updateItemDto'
 
 @injectable()
 export class ItemService {
@@ -59,6 +60,52 @@ export class ItemService {
     return this.create(
       ItemMapper.saveItemDtoToDomain(saveItemDto, imageMapping, exeFileRef, rootFileRef)
     )
+  }
+
+  async updateForFront(straightItem: string): Promise<Item | null> {
+    const updateItemDto = JSON.parse(straightItem) as UpdateItemDto
+
+    const [imageMapping, exeFileRef, rootFileRef] = await Promise.all([
+      updateItemDto.mainImgPath
+        ? this.imageMappingService.saveByPath(updateItemDto.mainImgPath)
+        : null,
+      updateItemDto.exeFileRefPath
+        ? this.fileRefService.saveByPath(updateItemDto.exeFileRefPath)
+        : null,
+      updateItemDto.rootFileRefPath
+        ? this.fileRefService.saveByPath(updateItemDto.rootFileRefPath)
+        : null
+    ])
+
+    return this.update(
+      ItemMapper.updateItemDtoToDomain(updateItemDto, imageMapping, exeFileRef, rootFileRef)
+    )
+  }
+
+  async update(item: Item): Promise<Item | null> {
+    const pastItem = await this.findById(item.id!)
+    if (!pastItem) {
+      //업데이트할 대상이 아니였다면 추가하려 했던 데이터를 제거한다
+      this.deleteRef(item).catch((e) => console.error(e))
+      return null
+    }
+
+    //기존 연결된 파일 데이터를 제거
+    this.deleteRef(pastItem).catch((e) => console.error(e))
+
+    //기존 연결된 카테괴리 정보 및 KIND 정류제거
+    await Promise.all([
+      this.itemAndCategoryRepo.deleteByItemId(item.id!),
+      this.itemAndKindRepo.deleteByItemId(item.id!)
+    ])
+
+    return await this.create(item)
+  }
+
+  private async deleteRef(item: Item): Promise<void> {
+    this.fileRefService.deleteById(item.rootFileRefId).catch((e) => console.error(e))
+    this.fileRefService.deleteById(item.exeFileRefId).catch((e) => console.error(e))
+    this.imageMappingService.deleteById(item.rootFileRefId).catch((e) => console.error(e))
   }
 
   async save(straightItem: string): Promise<Item> {

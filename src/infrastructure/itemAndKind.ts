@@ -34,4 +34,8 @@ export class ItemAndKindRepo {
   async findAll(): Promise<ItemAndKind[]> {
     return await this.ItemAndKindRepository.find()
   }
+
+  async deleteByItemId(itemId: number): Promise<void> {
+    await this.ItemAndKindRepository.delete({ itemId: itemId })
+  }
 }

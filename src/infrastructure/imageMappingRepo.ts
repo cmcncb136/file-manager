@@ -26,4 +26,8 @@ export class ImageMappingRepo {
   async findAll(): Promise<ImageMappingEntity[]> {
     return await this.imageMappingRepository.find()
   }
+
+  async deleteById(id: number): Promise<void> {
+    await this.imageMappingRepository.delete({ id: id })
+  }
 }

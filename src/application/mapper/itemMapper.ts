@@ -4,6 +4,7 @@ import { FileRefEntity } from '../../entity/fileRefEntity'
 import { ImageMappingEntity } from '../../entity/imageMappingEntity'
 import { ItemWithPathRequestDto } from '../dto/itemWithPathRequestDto'
 import { SaveItemDto } from '../dto/saveItemDto'
+import { UpdateItemDto } from '../dto/updateItemDto'
 
 export class ItemMapper {
   static toDomain(
@@ -40,6 +41,25 @@ export class ItemMapper {
       deleted: false,
       categoryIds: saveItemDto.categoryIds,
       kindIds: saveItemDto.kindIds
+    } as Item
+  }
+
+  static updateItemDtoToDomain(
+    updateItemDto: UpdateItemDto,
+    imageMappingEntity: ImageMappingEntity | null,
+    exeFileRefEntity: FileRefEntity | null,
+    rootFileRefEntity: FileRefEntity | null
+  ): Item {
+    return {
+      id: updateItemDto.id,
+      title: updateItemDto.title,
+      description: updateItemDto.description,
+      mainImgId: imageMappingEntity?.id ?? null,
+      exeFileRefId: exeFileRefEntity?.id ?? null,
+      rootFileRefId: rootFileRefEntity?.id ?? null,
+      deleted: false,
+      categoryIds: updateItemDto.categoryIds,
+      kindIds: updateItemDto.kindIds
     } as Item
   }
 

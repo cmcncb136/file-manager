@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ItemDto } from '@renderer/dto/itemDto'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import noImage from '/src/assets/no_img_square.png'
 import { useModalStore } from '@renderer/stores/useModalStore'
 
@@ -39,6 +39,20 @@ onMounted(() => {
   const url = encodeURI(mainImg.realPath.replace(/\\/g, '/'))
   showImg.value = 'file://' + url
 })
+
+watch(
+  () => props.item,
+  () => {
+    const mainImg = props.item.mainImg
+    if (mainImg == null) {
+      showImg.value = noImage
+      return
+    }
+
+    const url = encodeURI(mainImg.realPath.replace(/\\/g, '/'))
+    showImg.value = 'file://' + url
+  }
+)
 </script>
 
 <template>

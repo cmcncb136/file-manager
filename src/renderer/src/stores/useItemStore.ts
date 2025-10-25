@@ -6,6 +6,7 @@ import { useKindStore } from '@renderer/stores/useKindStore'
 import { SaveItemDto } from '@renderer/dto/saveItemDto'
 import { ItemDto } from '@renderer/dto/itemDto'
 import { ItemWithPathRequestDto } from '@renderer/dto/itemWithPathRequestDto'
+import { UpdateItemDto } from '@renderer/dto/updateItemDto'
 
 export const useItemStore = defineStore('item', () => {
   const rawItems = ref<ItemWithPathRequestDto[]>([])
@@ -61,6 +62,33 @@ export const useItemStore = defineStore('item', () => {
     }
   }
 
+  const updateItem = async (updateItem: UpdateItemDto): Promise<Item | null> => {
+    try {
+      const item = (await window.api.callService('ItemService', 'updateForFront', [
+        JSON.stringify(updateItem)
+      ])) as Item
+
+      const changeIndex = rawItems.value.findIndex((it) => it.id === item.id)
+      const itemWithPath = (await window.api.callService('ItemService', 'findItemWithPathById', [
+        item.id
+      ])) as ItemWithPathRequestDto
+
+      if (changeIndex > -1) rawItems.value = rawItems.value.with(changeIndex, itemWithPath) //교체
+      if (changeIndex < 0) rawItems.value.push(itemWithPath) // 없는 경우 마지막에 추가 (사실 일어나면 안되는 케이스)
+
+      return item
+    } catch (err: never | unknown) {
+      if (err instanceof Error) {
+        console.error(err.message)
+        error.value = err.message
+      } else {
+        error.value = 'unknown error'
+      }
+
+      return null
+    }
+  }
+
   const saveItem = async (saveItem: SaveItemDto): Promise<Item | null> => {
     try {
       const item = (await window.api.callService('ItemService', 'saveRaw', [
@@ -90,5 +118,7 @@ export const useItemStore = defineStore('item', () => {
     fetchItems,
     items,
     saveItem
+    saveItem,
+    updateItem,
   }
 })
