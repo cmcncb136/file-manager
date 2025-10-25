@@ -6,19 +6,19 @@ import { storeToRefs } from 'pinia'
 
 const itemStore = useItemStore()
 const { fetchItems } = itemStore
-const { items } = storeToRefs(itemStore)
+const { filteredItems } = storeToRefs(itemStore)
 
 onMounted(async () => {
   await fetchItems()
   await nextTick()
-  console.log(JSON.stringify(items.value))
+  console.log(JSON.stringify(filteredItems.value))
 })
 </script>
 
 <template>
   <div class="main-container" @click="fetchItems">
     <div class="content-container">
-      <div v-for="item in items" :key="item.id!" class="item-container">
+      <div v-for="item in filteredItems" :key="item.id!" class="item-container">
         <ViewTemplate :item="item" />
       </div>
     </div>

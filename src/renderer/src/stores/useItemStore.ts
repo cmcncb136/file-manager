@@ -13,6 +13,10 @@ export const useItemStore = defineStore('item', () => {
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
+  const filterCategoryIds = ref<Set<number>>(new Set())
+  const filterKindIds = ref<Set<number>>(new Set())
+  const filterTitle = ref<string | null>(null)
+
   const categoryStore = useCategoryStore()
   const kindStore = useKindStore()
 
@@ -114,11 +118,40 @@ export const useItemStore = defineStore('item', () => {
     }
   }
 
+  const filteredItemByCategoryIds = (items: ItemDto[]): ItemDto[] => {
+    if (filterCategoryIds.value.size === 0) return items
+
+    return items.filter((item) =>
+      item.categories.find((category) => filterCategoryIds.value.has(category.id!))
+    )
+  }
+
+  const filteredItemByKindIds = (items: ItemDto[]): ItemDto[] => {
+    if (filterKindIds.value.size === 0) return items
+
+    return items.filter((item) => item.kinds.find((kind) => filterKindIds.value.has(kind.id!)))
+  }
+
+  const filteredItemByTitle = (items: ItemDto[]): ItemDto[] => {
+    if (!filterTitle.value || filterTitle.value.trim().length === 0) return items
+
+    return items.filter((item) =>
+      item.title.toLowerCase().includes(filterTitle.value!.toLowerCase())
+    )
+  }
+
+  const filteredItems = computed(() => {
+    return filteredItemByTitle(filteredItemByKindIds(filteredItemByCategoryIds(items.value)))
+  })
+
   return {
     fetchItems,
     items,
-    saveItem
     saveItem,
     updateItem,
+    filteredItems,
+    filterCategoryIds,
+    filterKindIds,
+    filterTitle
   }
 })

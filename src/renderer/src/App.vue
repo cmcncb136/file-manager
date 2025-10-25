@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-import ItemTemplateModal from '@renderer/views/modal/ItemTemplateModal.vue'
 import Home from '@renderer/views/Home.vue'
 import Nav from '@renderer/views/Nav.vue'
 import { ItemDto } from '@renderer/dto/itemDto'
 import { useModalStore } from '@renderer/stores/useModalStore'
 import { storeToRefs } from 'pinia'
+import AddItemModal from '@renderer/views/modal/AddItemModal.vue'
+import EditItemModal from '@renderer/views/modal/EditItemModal.vue'
 
 const modalStore = useModalStore()
 
@@ -36,8 +37,8 @@ watch(activeModal, () => {
 </script>
 
 <template>
-  <ItemTemplateModal v-if="isItemAddModal" @close-item-add-modal="close" />
-  <ItemTemplateModal v-if="isItemEditModal" :item="editItem" @close-item-add-modal="close" />
+  <AddItemModal v-if="isItemAddModal" @close-item-add-modal="close" />
+  <EditItemModal v-if="isItemEditModal" :item="editItem" @close-item-add-modal="close" />
 
   <div style="display: flex; flex-direction: column; align-content: center; height: 100%">
     <Nav />
