@@ -5,52 +5,46 @@ import { useKindStore } from '@renderer/stores/useKindStore'
 import { useModalStore } from '@renderer/stores/useModalStore'
 import { CategoryEntity } from '../../../entity/categoryEntity'
 import { KindEntity } from '../../../entity/kindEntity'
-import { useItemStore } from '@renderer/stores/useItemStore'
 import { storeToRefs } from 'pinia'
+import { useItemFilterStore } from '@renderer/stores/useItemFilterStore'
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
 const modalStore = useModalStore()
-const itemStore = useItemStore()
+const itemFilterStore = useItemFilterStore()
 
 const { open } = modalStore
-const { filterCategoryIds, filterKindIds, filterTitle } = storeToRefs(itemStore)
+const { selectedCategoryIds, selectedKindIds, searchKeyword } = storeToRefs(itemFilterStore)
+
+const searchText = ref<string>('')
 
 onMounted(() => {
   categoryStore.fetchCategories()
   kindStore.fetchKinds()
 })
 
-const selectedCategoryIds = ref<Set<number>>(new Set())
-const selectedKindIds = ref<Set<number>>(new Set())
-const searchText = ref<string>('')
-
 const categoryClickHandler = async (category: CategoryEntity): Promise<void> => {
   if (selectedCategoryIds.value.has(category.id!)) {
     selectedCategoryIds.value.delete(category.id!)
-    filterCategoryIds.value.delete(category.id!)
     return
   }
 
   selectedCategoryIds.value.add(category.id!)
-  filterCategoryIds.value.add(category.id!)
 }
 
 const kindClickHandler = async (kind: KindEntity): Promise<void> => {
   if (selectedKindIds.value.has(kind.id!)) {
     selectedKindIds.value.delete(kind.id!)
-    filterKindIds.value.delete(kind.id!)
     return
   }
 
   selectedKindIds.value.add(kind.id!)
-  filterKindIds.value.add(kind.id!)
 }
 
 watch(
   () => searchText.value,
   () => {
-    filterTitle.value = searchText.value
+    searchKeyword.value = searchText.value
   }
 )
 </script>

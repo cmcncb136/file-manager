@@ -1,22 +1,15 @@
 <script setup lang="ts">
 import ViewTemplate from '../components/ViewTemplate.vue'
-import { useItemStore } from '@renderer/stores/useItemStore'
-import { nextTick, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useItemFilterStore } from '@renderer/stores/useItemFilterStore'
 
-const itemStore = useItemStore()
-const { fetchItems } = itemStore
-const { filteredItems } = storeToRefs(itemStore)
+const itemFilterStore = useItemFilterStore()
+const { filteredItems } = storeToRefs(itemFilterStore)
 
-onMounted(async () => {
-  await fetchItems()
-  await nextTick()
-  console.log(JSON.stringify(filteredItems.value))
-})
 </script>
 
 <template>
-  <div class="main-container" @click="fetchItems">
+  <div class="main-container">
     <div class="content-container">
       <div v-for="item in filteredItems" :key="item.id!" class="item-container">
         <ViewTemplate :item="item" />

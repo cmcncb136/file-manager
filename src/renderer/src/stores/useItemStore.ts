@@ -1,5 +1,5 @@
 import { defineStore, storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { Item } from '../../../domain/item'
 import { useCategoryStore } from '@renderer/stores/useCategoryStore'
 import { useKindStore } from '@renderer/stores/useKindStore'
@@ -8,14 +8,11 @@ import { ItemDto } from '@renderer/dto/itemDto'
 import { ItemWithPathRequestDto } from '@renderer/dto/itemWithPathRequestDto'
 import { UpdateItemDto } from '@renderer/dto/updateItemDto'
 
+let initialized = false
 export const useItemStore = defineStore('item', () => {
   const rawItems = ref<ItemWithPathRequestDto[]>([])
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
-
-  const filterCategoryIds = ref<Set<number>>(new Set())
-  const filterKindIds = ref<Set<number>>(new Set())
-  const filterTitle = ref<string | null>(null)
 
   const categoryStore = useCategoryStore()
   const kindStore = useKindStore()
@@ -118,30 +115,15 @@ export const useItemStore = defineStore('item', () => {
     }
   }
 
-  const filteredItemByCategoryIds = (items: ItemDto[]): ItemDto[] => {
-    if (filterCategoryIds.value.size === 0) return items
+  const initialize = async (): Promise<void> => {
+    if (initialized) return
 
-    return items.filter((item) =>
-      item.categories.find((category) => filterCategoryIds.value.has(category.id!))
-    )
+    initialized = true
+    await fetchItems()
   }
 
-  const filteredItemByKindIds = (items: ItemDto[]): ItemDto[] => {
-    if (filterKindIds.value.size === 0) return items
-
-    return items.filter((item) => item.kinds.find((kind) => filterKindIds.value.has(kind.id!)))
-  }
-
-  const filteredItemByTitle = (items: ItemDto[]): ItemDto[] => {
-    if (!filterTitle.value || filterTitle.value.trim().length === 0) return items
-
-    return items.filter((item) =>
-      item.title.toLowerCase().includes(filterTitle.value!.toLowerCase())
-    )
-  }
-
-  const filteredItems = computed(() => {
-    return filteredItemByTitle(filteredItemByKindIds(filteredItemByCategoryIds(items.value)))
+  onMounted(async () => {
+    if (items.value.length === 0) await fetchItems()
   })
 
   return {
@@ -149,9 +131,6 @@ export const useItemStore = defineStore('item', () => {
     items,
     saveItem,
     updateItem,
-    filteredItems,
-    filterCategoryIds,
-    filterKindIds,
-    filterTitle
+    initialize
   }
 })
