@@ -7,6 +7,7 @@ import { CategoryEntity } from '../../../entity/categoryEntity'
 import { KindEntity } from '../../../entity/kindEntity'
 import { storeToRefs } from 'pinia'
 import { useItemFilterStore } from '@renderer/stores/useItemFilterStore'
+import ExtendSearch from '@renderer/components/ExtendSearch.vue'
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
@@ -59,26 +60,32 @@ watch(
       <button class="add-button control-button" @click="open('addItem')">ADD</button>
     </div>
     <div class="control-container">
-      <div class="kind-container">
-        <div
-          v-for="kind in kindStore.kinds"
-          :key="kind.id!"
-          class="kind"
-          :class="{ 'kind-select': selectedKindIds.has(kind.id!) }"
-          @click="kindClickHandler(kind)"
-        >
-          {{ kind.name }}
+      <div class="control-container-line">
+        <ExtendSearch style="background-color: #ff5e5e; color: white" placeholder="KIND 입력" />
+        <div class="kind-container">
+          <div
+            v-for="kind in kindStore.kinds"
+            :key="kind.id!"
+            class="kind"
+            :class="{ 'kind-select': selectedKindIds.has(kind.id!) }"
+            @click="kindClickHandler(kind)"
+          >
+            {{ kind.name }}
+          </div>
         </div>
       </div>
-      <div class="category-container">
-        <div
-          v-for="(category, i) in categoryStore.categories"
-          :key="i"
-          class="category"
-          :class="{ 'category-select': selectedCategoryIds.has(category.id!) }"
-          @click="categoryClickHandler(category)"
-        >
-          {{ category.name }}
+      <div class="control-container-line">
+        <ExtendSearch style="background-color: #008cff; color: white" placeholder="카테고리 입력" />
+        <div class="category-container">
+          <div
+            v-for="(category, i) in categoryStore.categories"
+            :key="i"
+            class="category"
+            :class="{ 'category-select': selectedCategoryIds.has(category.id!) }"
+            @click="categoryClickHandler(category)"
+          >
+            {{ category.name }}
+          </div>
         </div>
       </div>
     </div>
@@ -113,6 +120,11 @@ watch(
   overflow-x: scroll;
   gap: 5px;
   height: 50px;
+}
+
+.control-container-line {
+  display: flex;
+  align-items: center;
 }
 
 .category {
@@ -182,7 +194,7 @@ input {
 }
 
 .search-button {
-  background-color: #008cff;
+  background-color: #efd653;
   aspect-ratio: 1;
   padding: 0;
   color: white;
