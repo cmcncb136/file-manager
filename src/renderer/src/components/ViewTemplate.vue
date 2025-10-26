@@ -3,9 +3,14 @@ import { ItemDto } from '@renderer/dto/itemDto'
 import { onMounted, ref, watch } from 'vue'
 import noImage from '/src/assets/no_img_square.png'
 import { useModalStore } from '@renderer/stores/useModalStore'
+import { useItemFilterStore } from '@renderer/stores/useItemFilterStore'
+import { storeToRefs } from 'pinia'
 
 const modalStore = useModalStore()
+const itemFilterStore = useItemFilterStore()
+
 const { open } = modalStore
+const { selectedCategoryIds, selectedKindIds } = storeToRefs(itemFilterStore)
 
 const showImg = ref<string>(noImage)
 const props = defineProps<{
@@ -66,12 +71,24 @@ watch(
 
     <div class="middle-box">
       <div class="categories-box">
-        <span v-for="category in props.item.categories" :key="category.id!" class="category">
+        <span
+          v-for="category in props.item.categories"
+          :key="category.id!"
+          :class="{ 'category-select': selectedCategoryIds.has(category.id!) }"
+          class="category"
+        >
           {{ category.name }}
         </span>
       </div>
       <div class="kind-box">
-        <div v-for="kind in props.item.kinds" :key="kind.id!" class="kind">{{ kind.name }}</div>
+        <div
+          v-for="kind in props.item.kinds"
+          :key="kind.id!"
+          :class="{ 'kind-select': selectedKindIds.has(kind.id!) }"
+          class="kind"
+        >
+          {{ kind.name }}
+        </div>
       </div>
     </div>
     <hr />
@@ -141,11 +158,18 @@ watch(
 }
 
 .kind {
+  border: 1px solid gainsboro;
   background-color: #ff5e5e;
   border-radius: 10px;
   padding: 3px;
   color: white;
   font-weight: 550;
+}
+
+.kind-select {
+  background-color: white;
+  border-color: #ff5e5e;
+  color: #ff5e5e;
 }
 
 .categories-box {
@@ -165,6 +189,12 @@ watch(
   color: white;
   font-size: small;
   font-weight: 550;
+}
+
+.category-select {
+  border-color: cornflowerblue;
+  background-color: white;
+  color: cornflowerblue;
 }
 
 .info-box {
