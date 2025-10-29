@@ -86,9 +86,10 @@ const selectFileHandler = async () => {
 }
 
 const addCategory = (category: string) => {
+  if(category.trim().length <= 0) return
   if (categories.value.filter((it) => it.name.toLowerCase() === category.toLowerCase()).length > 0)
     return
-  saveCategory(categoryInputValue.value)
+  saveCategory(category)
 }
 
 const findFileHandler = async (target: HTMLInputElement | undefined): Promise<void> => {
@@ -155,15 +156,6 @@ const submit = async (
   } as SaveItemDto
 
   emit('submit', saveDto)
-  // return await saveItem({
-  //   title: title,
-  //   description: 'test',
-  //   mainImgPath: mainImgPath,
-  //   exeFileRefPath: exePath,
-  //   rootFileRefPath: rootPath,
-  //   categoryIds: [...selectedCategorySet.value].map((it) => it.id!),
-  //   kindIds: selectedKindList.value.values().toArray()
-  // })
 }
 </script>
 
