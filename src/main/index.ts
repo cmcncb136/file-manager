@@ -10,6 +10,7 @@ import { ImageMappingService } from '../application/imageMappingService'
 import { KindService } from '../application/kindService'
 import { ItemService } from '../application/itemService'
 import { FileRefService } from '../application/fileRefService'
+import path from 'node:path'
 
 const services = {
   CategoryService: container.resolve(CategoryService),
@@ -78,6 +79,14 @@ function createWindow(): void {
 
     if (canceled) return null
     return filePaths[0]
+  })
+
+  ipcMain.handle('get-folder', async (_, { targetPath }) => {
+    return path.dirname(targetPath)
+  })
+
+  ipcMain.handle('get-file-name', async (_, { targetPath }) => {
+    return path.basename(targetPath)
   })
 
   ipcMain.handle('application-call', async (_, { service, method, payload }) => {

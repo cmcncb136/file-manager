@@ -6,6 +6,8 @@ const api = {
   selectImage: () => ipcRenderer.invoke('select-image'),
   selectFile: () => ipcRenderer.invoke('select-file'),
   selectFolder: () => electron.ipcRenderer.invoke('select-folder'),
+  getFolderByPath: (targetPath: string) => ipcRenderer.invoke('get-folder', { targetPath }),
+  getFileNameByPath: (targetPath: string) => ipcRenderer.invoke('get-file-name', { targetPath }),
   callService: (service: string, method: string, payload?: never) =>
     electron.ipcRenderer.invoke('application-call', { service, method, payload })
 }
