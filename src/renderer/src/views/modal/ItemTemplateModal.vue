@@ -28,6 +28,7 @@ const { kinds } = storeToRefs(kindStore)
 
 const mainImg = ref<string>(noImage)
 const mainImgPath = ref<string | null>(null)
+const description = ref<string>('')
 
 const rootPathInput = ref<HTMLInputElement>()
 const exePathInput = ref<HTMLInputElement>()
@@ -60,6 +61,7 @@ onMounted(async () => {
   if (item.title && titleInput.value) titleInput.value.value = item.title
   if (item.exeFile && exePathInput.value) exePathInput.value.value = item.exeFile.realPath
   if (item.rootFile && rootPathInput.value) rootPathInput.value.value = item.rootFile.realPath
+  if (item.description != null) description.value = item.description
 })
 
 const moveBottomScroll = async () => {
@@ -134,19 +136,20 @@ const submitHandler = (): void => {
   if (rootPathInput.value && rootPathInput.value?.value.trim() !== '')
     rootPath = rootPathInput.value.value
 
-  submit(titleInput.value!.value!, mainImgPath.value, exePath, rootPath)
+  submit(titleInput.value!.value!, description.value, mainImgPath.value, exePath, rootPath)
   //Todo. 연속 저장 방지 칠요할 수도 있음
 }
 
 const submit = async (
   title: string,
+  description: string,
   mainImgPath: string | null,
   exePath: string | null,
   rootPath: string | null
 ): Promise<void> => {
   const saveDto = {
     title: title,
-    description: 'test',
+    description: description,
     mainImgPath: mainImgPath,
     exeFileRefPath: exePath,
     rootFileRefPath: rootPath,
@@ -248,6 +251,15 @@ const submit = async (
           @deselect-category="deselectCategory"
           @move-bottom-scroll="moveBottomScroll"
         />
+      </div>
+
+      <div class="setting-right-box">
+        <div style="width: 100%">
+          <div>Description</div>
+          <div>
+            <textarea v-model="description" class="description" />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -372,5 +384,10 @@ button:hover {
 .kind-no-select:hover {
   color: #ff5e5e;
   border: 1px solid #ff5e5e;
+}
+
+.description {
+  width: 100%;
+  height: 200px;
 }
 </style>
