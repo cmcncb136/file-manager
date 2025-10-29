@@ -93,13 +93,14 @@ const addCategory = (category: string) => {
   saveCategory(categoryInputValue.value)
 }
 
-const findFileHandler = async (target: HTMLInputElement | undefined): Promise<void> => {
+const findFile = async (): Promise<string | null> => {
   if (window.api) {
     const path = await window.api.selectFile()
-    if (!path || !target) return
 
-    target.value = path
+    return path
   }
+
+  return null
 }
 
 const findFolderHandler = async (target: HTMLInputElement | undefined): Promise<void> => {
@@ -108,6 +109,23 @@ const findFolderHandler = async (target: HTMLInputElement | undefined): Promise<
     if (!path || !target) return
 
     target.value = path
+  }
+}
+
+const exeFileClickHandler = async (target: HTMLInputElement | undefined): Promise<void> => {
+  const path = await findFile()
+
+  if (!path || !target) return
+  target.value = path
+
+  const targetFolder = await window.api.getFolderByPath(target.value)
+
+  if (rootPathInput.value && rootPathInput.value.value.trim().length <= 0) {
+    rootPathInput.value.value = targetFolder
+  }
+
+  if (titleInput.value && titleInput.value.value.trim().length <= 0) {
+    titleInput.value.value = await window.api.getFileNameByPath(target.value)
   }
 }
 
@@ -192,11 +210,12 @@ const submit = async (
       <div class="setting-right-box">
         <input ref="titleInput" class="input-box" id="title" placeholder="title" type="text" />
       </div>
-      <div class="setting-right-box" @click="findFolderHandler(rootPathInput)">
+
+      <div class="setting-right-box" @click="exeFileClickHandler(exePathInput)">
         <div style="display: flex; flex-direction: column; width: 100%">
-          <div>Root Folder :</div>
+          <div>EXE FILE :</div>
           <div style="display: flex; width: 100%; gap: 5px">
-            <input ref="rootPathInput" disabled class="input-box" />
+            <input ref="exePathInput" disabled class="input-box" />
             <button class="file-find-btn">
               <i class="pi pi-folder" />
             </button>
@@ -204,11 +223,11 @@ const submit = async (
         </div>
       </div>
 
-      <div class="setting-right-box" @click="findFileHandler(exePathInput)">
+      <div class="setting-right-box" @click="findFolderHandler(rootPathInput)">
         <div style="display: flex; flex-direction: column; width: 100%">
-          <div>EXE FILE :</div>
+          <div>Root Folder :</div>
           <div style="display: flex; width: 100%; gap: 5px">
-            <input ref="exePathInput" disabled class="input-box" />
+            <input ref="rootPathInput" disabled class="input-box" />
             <button class="file-find-btn">
               <i class="pi pi-folder" />
             </button>
