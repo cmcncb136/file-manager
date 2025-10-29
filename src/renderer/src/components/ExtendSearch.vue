@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const inputRef = ref<HTMLDivElement>()
 const isExpanded = ref<boolean>(false)
 const isHovered = ref<boolean>(false)
-const searchText = ref<HTMLDivElement>()
+const searchText = ref<string>()
 
 const { placeholder = '검색어 입력' } = defineProps<{
   placeholder?: string
 }>()
 
 const emit = defineEmits<{
-  (e: 'onSearchChange', v: string): void
-  (e: 'onSearchEnter', v: string): void
+  (e: 'on-search-change', v: string): void
+  (e: 'on-search-enter', v: string): void
 }>()
 
 const onMouseEnter = (): void => {
@@ -41,9 +41,16 @@ const onBlur = (): void => {
 }
 
 const enterHandler = (): void => {
-  emit('onSearchEnter', searchText.value)
+  emit('on-search-enter', searchText.value as string)
   searchText.value = ''
 }
+
+watch(
+  () => searchText.value,
+  () => {
+    emit('on-search-change', searchText.value as string)
+  }
+)
 </script>
 
 <template>
@@ -61,7 +68,6 @@ const enterHandler = (): void => {
       type="text"
       class="search-input"
       :placeholder="placeholder"
-      @change="$emit('onSearchChange', $event.target.value)"
       @keydown.enter="enterHandler"
       @blur="onBlur"
     />
@@ -74,10 +80,9 @@ const enterHandler = (): void => {
   border-radius: 10px;
   padding-block: 4px;
   padding-inline: 8px;
-  margin-inline: 5px;
   transition: width 0.5s ease;
-  width: 35px;
-  height: 35px;
+  width: 80px;
+  height: 40px;
 }
 
 .extend-search-container:focus {

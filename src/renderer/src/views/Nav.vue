@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useCategoryStore } from '@renderer/stores/useCategoryStore'
-import { onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useKindStore } from '@renderer/stores/useKindStore'
 import { useModalStore } from '@renderer/stores/useModalStore'
 import { CategoryEntity } from '../../../entity/categoryEntity'
@@ -16,6 +16,11 @@ const itemFilterStore = useItemFilterStore()
 
 const { open } = modalStore
 const { selectedCategoryIds, selectedKindIds, searchKeyword } = storeToRefs(itemFilterStore)
+const { kinds } = storeToRefs(kindStore)
+const { categories } = storeToRefs(categoryStore)
+
+const kindSearchText = ref<string>('')
+const categorySearchText = ref<string>('')
 
 const searchText = ref<string>('')
 
@@ -48,6 +53,40 @@ watch(
     searchKeyword.value = searchText.value
   }
 )
+
+const filteredKinds = computed(() => {
+  if (kindSearchText.value.trim().length <= 0) return kinds.value
+  return kinds.value.filter((kind) =>
+    kind.name.toLowerCase().includes(kindSearchText.value.toLowerCase())
+  )
+})
+
+const filteredCategories = computed(() => {
+  if (categorySearchText.value.trim().length <= 0) return categories.value
+
+  return categories.value.filter((category) =>
+    category.name.toLowerCase().includes(categorySearchText.value.toLowerCase())
+  )
+})
+
+const kindSearchHandler = (search: string): void => {
+  kindSearchText.value = search
+}
+
+const categorySearchHandler = (search: string): void => {
+  categorySearchText.value = search
+}
+
+const kindSearchEnterHandler = async (): Promise<void> => {
+  await nextTick()
+  filteredKinds.value.forEach((kind) => selectedKindIds.value.add(kind.id!))
+}
+
+const categorySearchEnterHandler = async (): Promise<void> => {
+  await nextTick()
+  filteredCategories.value.forEach((category) => selectedCategoryIds.value.add(category.id!))
+}
+
 </script>
 
 <template>
@@ -61,10 +100,18 @@ watch(
     </div>
     <div class="control-container">
       <div class="control-container-line">
-        <ExtendSearch style="background-color: #ff5e5e; color: white" placeholder="KIND 입력" />
+        <ExtendSearch
+          style="background-color: #ff5e5e; color: white"
+          placeholder="KIND 입력"
+          @on-search-change="kindSearchHandler"
+          @on-search-enter="kindSearchEnterHandler"
+        />
+        <button v-if="selectedKindIds.size" class="reset-button" @click="selectedKindIds.clear()">
+          <i class="pi pi-refresh" />
+        </button>
         <div class="kind-container">
           <div
-            v-for="kind in kindStore.kinds"
+            v-for="kind in filteredKinds"
             :key="kind.id!"
             class="kind"
             :class="{ 'kind-select': selectedKindIds.has(kind.id!) }"
@@ -75,10 +122,18 @@ watch(
         </div>
       </div>
       <div class="control-container-line">
-        <ExtendSearch style="background-color: #008cff; color: white" placeholder="카테고리 입력" />
+        <ExtendSearch
+          style="background-color: #008cff; color: white"
+          placeholder="카테고리 입력"
+          @on-search-change="categorySearchHandler"
+          @on-search-enter="categorySearchEnterHandler"
+        />
+        <button v-if="selectedCategoryIds.size" class="reset-button" @click="selectedCategoryIds.clear()">
+          <i class="pi pi-refresh" />
+        </button>
         <div class="category-container">
           <div
-            v-for="(category, i) in categoryStore.categories"
+            v-for="(category, i) in filteredCategories"
             :key="i"
             class="category"
             :class="{ 'category-select': selectedCategoryIds.has(category.id!) }"
@@ -122,9 +177,19 @@ watch(
   height: 50px;
 }
 
+.reset-button {
+  border-radius: 10px;
+  padding-block: 4px;
+  padding-inline: 8px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
 .control-container-line {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .category {
@@ -204,6 +269,7 @@ input {
   background-color: #9afaa1;
   font-size: small;
 }
+
 
 button:hover {
   filter: brightness(0.8);
