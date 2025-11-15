@@ -86,7 +86,6 @@ const categorySearchEnterHandler = async (): Promise<void> => {
   await nextTick()
   filteredCategories.value.forEach((category) => selectedCategoryIds.value.add(category.id!))
 }
-
 </script>
 
 <template>
@@ -97,6 +96,9 @@ const categorySearchEnterHandler = async (): Promise<void> => {
         <i class="pi pi-search" />
       </button>
       <button class="add-button control-button" @click="open('addItem')">ADD</button>
+      <button class="setting-button control-button" @click="open('setting')">
+        <i class="pi pi-cog" />
+      </button>
     </div>
     <div class="control-container">
       <div class="control-container-line">
@@ -128,7 +130,11 @@ const categorySearchEnterHandler = async (): Promise<void> => {
           @on-search-change="categorySearchHandler"
           @on-search-enter="categorySearchEnterHandler"
         />
-        <button v-if="selectedCategoryIds.size" class="reset-button" @click="selectedCategoryIds.clear()">
+        <button
+          v-if="selectedCategoryIds.size"
+          class="reset-button"
+          @click="selectedCategoryIds.clear()"
+        >
           <i class="pi pi-refresh" />
         </button>
         <div class="category-container">
@@ -265,11 +271,17 @@ input {
   color: white;
 }
 
+.setting-button {
+  background-color: #3f3f3f;
+  aspect-ratio: 1;
+  padding: 0;
+  color: white;
+}
+
 .add-button {
   background-color: #9afaa1;
   font-size: small;
 }
-
 
 button:hover {
   filter: brightness(0.8);

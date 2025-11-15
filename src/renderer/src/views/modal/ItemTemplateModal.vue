@@ -39,7 +39,6 @@ const MAIN_IMAGE_NULL_LABEL_MSG = 'Select Main Image'
 const selectedKindList = ref<number[]>(props.item?.kinds.map((it) => it.id!) ?? [])
 
 const modalBodyRight = ref<HTMLElement>()
-const categoryInputValue = ref<string>('')
 const selectedCategorySet = ref<Set<CategoryEntity>>(new Set<CategoryEntity>())
 
 onMounted(async () => {

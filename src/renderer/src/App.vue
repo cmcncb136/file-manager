@@ -8,6 +8,7 @@ import { useModalStore } from '@renderer/stores/useModalStore'
 import { storeToRefs } from 'pinia'
 import AddItemModal from '@renderer/views/modal/AddItemModal.vue'
 import EditItemModal from '@renderer/views/modal/EditItemModal.vue'
+import SettingModal from '@renderer/views/modal/SettingModal.vue'
 
 const modalStore = useModalStore()
 
@@ -16,11 +17,14 @@ const { close } = modalStore
 const isItemAddModal = ref(false)
 
 const isItemEditModal = ref(false)
+
+const isSettingModal = ref(false)
 const editItem = ref()
 
 watch(activeModal, () => {
   isItemAddModal.value = false
   isItemEditModal.value = false
+  isSettingModal.value = false
 
   switch (activeModal.value) {
     case 'addItem':
@@ -29,6 +33,9 @@ watch(activeModal, () => {
     case 'editItem':
       isItemEditModal.value = !!activeModal.value
       if (data.value) editItem.value = data.value as ItemDto
+      break
+    case 'setting':
+      isSettingModal.value = !!activeModal.value
       break
     default:
       break
@@ -39,6 +46,7 @@ watch(activeModal, () => {
 <template>
   <AddItemModal v-if="isItemAddModal" @close-item-add-modal="close" />
   <EditItemModal v-if="isItemEditModal" :item="editItem" @close-item-add-modal="close" />
+  <SettingModal v-if="isSettingModal" @close-item-add-modal="close" />
 
   <div style="display: flex; flex-direction: column; align-content: center; height: 100%">
     <Nav />
