@@ -90,10 +90,23 @@ export class ItemService {
       return null
     }
 
-    //기존 연결된 파일 데이터를 제거
-    this.deleteRef(pastItem).catch((e) => console.error(e))
+    // 신규 데이터가 null인 경우 기존 데이터 유지
+    if (item.mainImgId == null) item.mainImgId = pastItem.mainImgId
+    if (item.exeFileRefId == null) item.exeFileRefId = pastItem.exeFileRefId
+    if (item.rootFileRefId == null) item.rootFileRefId = pastItem.rootFileRefId
 
-    //기존 연결된 카테괴리 정보 및 KIND 정류제거
+    // 기존 연결된 파일 데이터 중 변경된 것만 제거
+    if (item.rootFileRefId !== pastItem.rootFileRefId) {
+      this.fileRefService.deleteById(pastItem.rootFileRefId).catch((e) => console.error(e))
+    }
+    if (item.exeFileRefId !== pastItem.exeFileRefId) {
+      this.fileRefService.deleteById(pastItem.exeFileRefId).catch((e) => console.error(e))
+    }
+    if (item.mainImgId !== pastItem.mainImgId) {
+      this.imageMappingService.deleteById(pastItem.mainImgId).catch((e) => console.error(e))
+    }
+
+    //기존 연결된 카테고리 정보 및 KIND 종류 제거
     await Promise.all([
       this.itemAndCategoryRepo.deleteByItemId(item.id!),
       this.itemAndKindRepo.deleteByItemId(item.id!)
@@ -105,7 +118,7 @@ export class ItemService {
   private async deleteRef(item: Item): Promise<void> {
     this.fileRefService.deleteById(item.rootFileRefId).catch((e) => console.error(e))
     this.fileRefService.deleteById(item.exeFileRefId).catch((e) => console.error(e))
-    this.imageMappingService.deleteById(item.rootFileRefId).catch((e) => console.error(e))
+    this.imageMappingService.deleteById(item.mainImgId).catch((e) => console.error(e))
   }
 
   async save(straightItem: string): Promise<Item> {

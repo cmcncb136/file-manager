@@ -31,22 +31,25 @@ export class FileService {
     const savedPath = path.join(this.appDataPath, generatePath) //system를 기준으로하는 path
     await fs.promises.mkdir(savedPath, { recursive: true }) // 폴더 없으면 생성
 
-    let copyFileName = uuidv4() //파일 이름 생성
+    const fileExtension = this.getFileExtension(sourcePath)
+    let copyFileName = uuidv4() + fileExtension // macOS/Linux에서도 확장자를 포함하는 것이 OS 인식에 유리함
 
     if (this.platform === 'win32') {
-      copyFileName += '.lnk'
+      copyFileName = uuidv4() + '.lnk' // Windows 바로가기는 .lnk 확장자 고정
       const rst = shell.writeShortcutLink(path.join(savedPath, copyFileName), 'create', {
         target: sourcePath
       })
       if (!rst) {
-        console.error(`Copied fail ${copyFileName} to ${sourcePath}`)
+        console.error(`Shortcut creation failed: ${copyFileName} for ${sourcePath}`)
         throw new Error('window link generate fail')
       }
     } else {
       try {
-        await fs.promises.symlink(sourcePath, path.join(savedPath, copyFileName))
+        // sourcePath가 절대 경로인지 확인 (symlink는 절대 경로를 사용하는 것이 안전함)
+        const absoluteSourcePath = path.isAbsolute(sourcePath) ? sourcePath : path.resolve(sourcePath)
+        await fs.promises.symlink(absoluteSourcePath, path.join(savedPath, copyFileName))
       } catch (err) {
-        console.error(`Copied fail ${copyFileName} to ${sourcePath} err : ${err}`)
+        console.error(`Symlink creation failed: ${copyFileName} to ${sourcePath} err : ${err}`)
         throw new Error('symlink generate fail')
       }
     }

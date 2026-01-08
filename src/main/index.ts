@@ -11,6 +11,7 @@ import { KindService } from '../application/kindService'
 import { ItemService } from '../application/itemService'
 import { FileRefService } from '../application/fileRefService'
 import path from 'node:path'
+import * as fs from 'node:fs'
 
 const services = {
   CategoryService: container.resolve(CategoryService),
@@ -89,6 +90,51 @@ function createWindow(): void {
     return path.basename(targetPath)
   })
 
+  ipcMain.handle('export-db', async () => {
+    const dbPath = path.join(app.getPath('userData'), 'database.sqlite')
+    const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+      title: 'Export Database',
+      defaultPath: 'database.sqlite',
+      filters: [{ name: 'SQLite Database', extensions: ['sqlite'] }]
+    })
+
+    if (canceled || !filePath) return false
+
+    try {
+      await fs.promises.copyFile(dbPath, filePath)
+      return true
+    } catch (err) {
+      console.error('Export DB fail', err)
+      return false
+    }
+  })
+
+  ipcMain.handle('import-db', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      title: 'Import Database',
+      properties: ['openFile'],
+      filters: [{ name: 'SQLite Database', extensions: ['sqlite'] }]
+    })
+
+    if (canceled || filePaths.length === 0) return false
+
+    const sourcePath = filePaths[0]
+    const dbPath = path.join(app.getPath('userData'), 'database.sqlite')
+
+    try {
+      if (AppDataSource.isInitialized) {
+        await AppDataSource.destroy()
+      }
+      await fs.promises.copyFile(sourcePath, dbPath)
+      app.relaunch()
+      app.exit()
+      return true
+    } catch (err) {
+      console.error('Import DB fail', err)
+      return false
+    }
+  })
+
   ipcMain.handle('application-call', async (_, { service, method, payload }) => {
     const s = services[service]
     if (!s) throw new Error(`Controller ${service} not found`)
@@ -139,6 +185,13 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
+  }
+})
+
+app.on('will-quit', async () => {
+  if (AppDataSource.isInitialized) {
+    await AppDataSource.destroy()
+    console.log('✅ SQLite DB connection closed.')
   }
 })
 

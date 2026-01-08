@@ -30,9 +30,34 @@ export const useKindStore = defineStore('kind', () => {
     }
   }
 
+  const saveKind = async (name: string): Promise<KindEntity | null> => {
+    try {
+      const savedKind: KindEntity = await window.api.callService('KindService', 'saveByName', [
+        name
+      ])
+
+      //이전에 없는 값이면 추가
+      if (!kinds.value.find((it) => it.id === savedKind.id)) {
+        kinds.value.push(savedKind)
+        kindMap.value.set(savedKind.id!, savedKind)
+      }
+
+      return savedKind
+    } catch (err: never | unknown) {
+      if (err instanceof Error) {
+        error.value = err.message
+      } else {
+        error.value = 'unknown error'
+      }
+
+      return null
+    }
+  }
+
   return {
     kinds,
     fetchKinds,
+    saveKind,
     kindMap
   }
 })
