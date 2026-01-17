@@ -167,8 +167,9 @@ const categorySearchEnterHandler = async (): Promise<void> => {
 }
 
 .kind {
-  color: #3f3f3f;
-  border: 1px solid gainsboro;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  background-color: var(--btn-bg-color);
   border-radius: 10px;
   padding: 5px;
   font-weight: 550;
@@ -190,6 +191,9 @@ const categorySearchEnterHandler = async (): Promise<void> => {
   width: 40px;
   height: 40px;
   padding: 0;
+  background-color: var(--btn-bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
 
 .control-container-line {
@@ -199,10 +203,11 @@ const categorySearchEnterHandler = async (): Promise<void> => {
 }
 
 .category {
-  border: 1px solid gainsboro;
+  border: 1px solid var(--border-color);
+  background-color: var(--btn-bg-color);
   border-radius: 5px;
   padding: 5px;
-  color: #3f3f3f;
+  color: var(--text-color);
   font-size: small;
   font-weight: 550;
   transition: 0.3s;
@@ -241,6 +246,7 @@ const categorySearchEnterHandler = async (): Promise<void> => {
   flex-direction: column;
   gap: 10px;
   padding: 10px;
+  background-color: var(--bg-color);
 }
 
 .search-container {
@@ -254,7 +260,9 @@ const categorySearchEnterHandler = async (): Promise<void> => {
 input {
   height: 100%;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
   flex: 1;
   padding-inline: 4px;
 }

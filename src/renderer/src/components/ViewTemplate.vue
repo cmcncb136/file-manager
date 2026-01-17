@@ -122,7 +122,9 @@ watch(
   width: 250px;
   height: 100%;
   padding: 5px;
-  border: 1px solid gainsboro;
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -130,7 +132,7 @@ watch(
 }
 
 .main-box:hover {
-  border: 2px solid cornflowerblue;
+  border: 2px solid #535bf2;
 }
 
 .top-box {
@@ -138,6 +140,7 @@ watch(
   aspect-ratio: 1;
   border-radius: 10px;
   overflow: hidden;
+  background-color: var(--btn-bg-color);
 }
 
 .middle-box {
@@ -158,7 +161,7 @@ watch(
 }
 
 .kind {
-  border: 1px solid gainsboro;
+  border: 1px solid var(--border-color);
   background-color: #ff5e5e;
   border-radius: 10px;
   padding: 3px;
@@ -167,7 +170,7 @@ watch(
 }
 
 .kind-select {
-  background-color: white;
+  background-color: var(--bg-color);
   border-color: #ff5e5e;
   color: #ff5e5e;
 }
@@ -182,22 +185,24 @@ watch(
 }
 
 .category {
-  border: 1px solid gainsboro;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   padding: 5px;
-  background-color: cornflowerblue;
+  background-color: #535bf2;
   color: white;
   font-size: small;
   font-weight: 550;
 }
 
 .category-select {
-  border-color: cornflowerblue;
-  background-color: white;
-  color: cornflowerblue;
+  border-color: #535bf2;
+  background-color: var(--bg-color);
+  color: #535bf2;
 }
 
 .info-box {
+  padding: 4px;
+  font-weight: 600;
 }
 
 .control-box {
@@ -215,11 +220,12 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
 }
 
 .control-button:disabled {
-  filter: brightness(0.5);
-  background-color: #4f482c;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 button:hover {

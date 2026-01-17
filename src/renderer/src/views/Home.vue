@@ -29,7 +29,8 @@ const { filteredItems } = storeToRefs(itemFilterStore)
 .main-container {
   min-height: 75%;
   width: 100vw;
-  background-color: white;
+  background-color: var(--bg-color);
+  color: var(--text-color);
   flex-direction: column;
   overflow-y: auto;
 }

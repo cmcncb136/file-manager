@@ -107,31 +107,38 @@ watch(filteredCategoryList, async (): Promise<void> => {
 
 .category-input {
   border-radius: 7px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
   max-width: 94%;
   flex-grow: 1;
   margin-inline: 5px;
   font-size: medium;
+  padding: 4px;
 }
 
 .category-select-box {
   display: flex;
   width: 100%;
   text-align: center;
+  color: var(--text-color);
 }
 
 .category-add-btn {
-  background-color: rgb(255, 94, 94);
+  background-color: var(--btn-bg-color);
+  border: 1px solid var(--border-color);
   font-weight: bold;
   padding-block: 5px;
   padding-inline: 10px;
   font-size: medium;
-  color: white;
+  color: var(--text-color);
   aspect-ratio: 1;
+  border-radius: 4px;
 }
 
 .category-select-list-box {
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
   border-radius: 10px;
   width: 50%;
   margin: 5px;
@@ -140,7 +147,8 @@ watch(filteredCategoryList, async (): Promise<void> => {
 }
 
 .category-selected-line-box {
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-color);
   border-radius: 10px;
   width: 50%;
   margin: 5px;

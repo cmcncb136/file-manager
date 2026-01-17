@@ -44,7 +44,8 @@ defineEmits<{
 }
 
 .modal-content {
-  background-color: white;
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
   display: flex;
   width: 60vw;
   min-width: 600px;
@@ -52,6 +53,7 @@ defineEmits<{
   border-radius: 20px;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .modal-header {

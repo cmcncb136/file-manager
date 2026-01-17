@@ -3,6 +3,7 @@ import ModalTemplate from '@renderer/views/modal/ModalTemplate.vue'
 import { onMounted, ref } from 'vue'
 import { useCategoryStore } from '@renderer/stores/useCategoryStore'
 import { useKindStore } from '@renderer/stores/useKindStore'
+import { useThemeStore } from '@renderer/stores/useThemeStore'
 import { storeToRefs } from 'pinia'
 
 const emit = defineEmits<{
@@ -11,8 +12,10 @@ const emit = defineEmits<{
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
+const themeStore = useThemeStore()
 const { categories } = storeToRefs(categoryStore)
 const { kinds } = storeToRefs(kindStore)
+const { isDarkMode } = storeToRefs(themeStore)
 
 const newCategoryName = ref('')
 const newKindName = ref('')
@@ -52,6 +55,26 @@ const importDb = async () => {
   <ModalTemplate @close-item-add-modal="$emit('closeItemAddModal')">
     <div class="setting-container">
       <h2 class="title">Settings</h2>
+
+      <div class="section">
+        <h3>테마 설정</h3>
+        <div class="theme-toggle-group">
+          <button
+            class="btn theme-btn"
+            :class="{ active: !isDarkMode }"
+            @click="themeStore.setTheme('light')"
+          >
+            라이트 모드
+          </button>
+          <button
+            class="btn theme-btn"
+            :class="{ active: isDarkMode }"
+            @click="themeStore.setTheme('dark')"
+          >
+            다크 모드
+          </button>
+        </div>
+      </div>
 
       <div class="section">
         <h3>Category Management</h3>
@@ -103,14 +126,14 @@ const importDb = async () => {
   flex-direction: column;
   gap: 24px;
   overflow-y: auto;
-  color: #333;
+  color: var(--text-color);
 }
 
 .title {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 8px;
-  color: #222;
+  color: var(--text-color);
 }
 
 .section {
@@ -122,7 +145,7 @@ const importDb = async () => {
 .section h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #666;
+  color: var(--secondary-text-color);
   margin: 0;
 }
 
@@ -134,11 +157,13 @@ const importDb = async () => {
 input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--input-border-color);
   border-radius: 8px;
   outline: none;
   font-size: 14px;
   transition: border-color 0.2s;
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
 }
 
 input:focus {
@@ -152,17 +177,18 @@ input:focus {
   max-height: 100px;
   overflow-y: auto;
   padding: 8px;
-  background: #f9f9f9;
+  background: var(--btn-bg-color);
   border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
 .tag {
-  background: white;
-  border: 1px solid #eee;
+  background: var(--bg-color);
+  border: 1px solid var(--border-color);
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 12px;
-  color: #555;
+  color: var(--secondary-text-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -174,6 +200,8 @@ input:focus {
   cursor: pointer;
   transition: all 0.2s;
   border: none;
+  background-color: var(--btn-bg-color);
+  color: var(--btn-text-color);
 }
 
 .btn.primary {
@@ -186,12 +214,13 @@ input:focus {
 }
 
 .btn.secondary {
-  background-color: #f1f3f5;
-  color: #495057;
+  background-color: var(--btn-bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
 }
 
 .btn.secondary:hover {
-  background-color: #e9ecef;
+  filter: brightness(0.9);
 }
 
 .btn.danger {
@@ -200,8 +229,30 @@ input:focus {
   border: 1px solid #ffc9c9;
 }
 
+.dark-mode .btn.danger {
+  background-color: #4c1d1d;
+  color: #ff8787;
+  border: 1px solid #721c24;
+}
+
 .btn.danger:hover {
   background-color: #ffe3e3;
+}
+
+.theme-toggle-group {
+  display: flex;
+  gap: 10px;
+}
+
+.theme-btn {
+  flex: 1;
+  border: 1px solid var(--border-color);
+}
+
+.theme-btn.active {
+  background-color: #646cff;
+  color: white;
+  border-color: #646cff;
 }
 
 .btn-group {
@@ -212,6 +263,6 @@ input:focus {
 .footer-section {
   margin-top: auto;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
 }
 </style>

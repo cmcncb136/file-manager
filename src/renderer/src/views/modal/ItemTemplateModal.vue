@@ -285,10 +285,13 @@ button:hover {
 }
 
 .input-file-main-image {
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
   border-radius: 8px;
   padding: 10px;
   font-size: small;
+  cursor: pointer;
 }
 
 .file-find-btn {
@@ -298,6 +301,8 @@ button:hover {
   aspect-ratio: 1;
   height: 2em;
   color: white;
+  border: none;
+  border-radius: 4px;
 }
 
 #saveBtn {
@@ -346,6 +351,7 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 10px;
+  color: var(--text-color);
 }
 
 .setting-left-box {
@@ -360,7 +366,9 @@ button:hover {
 
 .input-box {
   border-radius: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
   padding: 5px;
   font-size: 1em;
   height: 2em;
@@ -378,8 +386,9 @@ button:hover {
 }
 
 .kind {
-  color: #3f3f3f;
-  border: 1px solid gainsboro;
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  background-color: var(--btn-bg-color);
   border-radius: 10px;
   padding: 5px;
   font-weight: 550;
@@ -389,6 +398,7 @@ button:hover {
 .kind-select {
   color: white;
   background-color: #ff5e5e;
+  border-color: #ff5e5e;
 }
 
 .kind-no-select:hover {
@@ -399,5 +409,11 @@ button:hover {
 .description {
   width: 100%;
   height: 200px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--input-bg-color);
+  color: var(--text-color);
+  padding: 10px;
+  outline: none;
 }
 </style>
