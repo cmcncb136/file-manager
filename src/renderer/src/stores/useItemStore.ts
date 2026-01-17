@@ -13,6 +13,8 @@ export const useItemStore = defineStore('item', () => {
   const rawItems = ref<ItemWithPathRequestDto[]>([])
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
+  const sortBy = ref<'title' | 'createdAt' | 'updatedAt' | 'isFavorite'>('title')
+  const sortOrder = ref<'asc' | 'desc'>('asc')
 
   const categoryStore = useCategoryStore()
   const kindStore = useKindStore()
@@ -25,7 +27,7 @@ export const useItemStore = defineStore('item', () => {
 
   //Todo. 추후 수정
   const items = computed(() => {
-    return rawItems.value.map((item: ItemWithPathRequestDto) => {
+    const mappedItems = rawItems.value.map((item: ItemWithPathRequestDto) => {
       return {
         id: item.id!,
         title: item.title,
@@ -40,8 +42,25 @@ export const useItemStore = defineStore('item', () => {
         kinds: item.kindIds.map((kindId) => {
           return kindMap.value.get(kindId)
         }),
-        isFavorite: item.isFavorite
+        isFavorite: item.isFavorite,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt
       } as ItemDto
+    })
+
+    return mappedItems.sort((a, b) => {
+      let comparison = 0
+      if (sortBy.value === 'title') {
+        comparison = a.title.localeCompare(b.title)
+      } else if (sortBy.value === 'createdAt') {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      } else if (sortBy.value === 'updatedAt') {
+        comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+      } else if (sortBy.value === 'isFavorite') {
+        comparison = Number(a.isFavorite) - Number(b.isFavorite)
+      }
+
+      return sortOrder.value === 'asc' ? comparison : -comparison
     })
   })
 
@@ -144,6 +163,11 @@ export const useItemStore = defineStore('item', () => {
     await fetchItems()
   }
 
+  const setSort = (field: 'title' | 'createdAt' | 'updatedAt' | 'isFavorite', order?: 'asc' | 'desc'): void => {
+    sortBy.value = field
+    if (order) sortOrder.value = order
+  }
+
   onMounted(async () => {
     if (items.value.length === 0) await fetchItems()
   })
@@ -154,6 +178,9 @@ export const useItemStore = defineStore('item', () => {
     saveItem,
     updateItem,
     toggleFavorite,
-    initialize
+    initialize,
+    setSort,
+    sortBy,
+    sortOrder
   }
 })

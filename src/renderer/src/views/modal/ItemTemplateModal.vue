@@ -11,6 +11,7 @@ import { SaveItemDto } from '@renderer/dto/saveItemDto'
 import RecommendationModal from '@renderer/views/modal/RecommendationModal.vue'
 import VideoFrameModal from '@renderer/views/modal/VideoFrameModal.vue'
 import { extractFrames } from '@renderer/utils/videoFrameExtractor'
+import { useItemStore } from '@renderer/stores/useItemStore'
 
 const emit = defineEmits<{
   (e: 'submit', value: SaveItemDto): void
@@ -22,9 +23,11 @@ const props = defineProps<{
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
+const itemStore = useItemStore()
 
 const { saveCategory } = categoryStore
 const { categories, categoryMap } = storeToRefs(categoryStore)
+const { items: allItems } = storeToRefs(itemStore)
 
 kindStore.fetchKinds()
 const { kinds } = storeToRefs(kindStore)
@@ -52,6 +55,9 @@ const isVideoModalOpen = ref(false)
 const videoFrames = ref<string[]>([])
 const isVideoLoading = ref(false)
 const videoPath = ref<string>('')
+
+const isDuplicateExe = ref(false)
+const duplicateItemTitle = ref('')
 
 const openRecommendation = async (): Promise<void> => {
   const currentTitle = titleInput.value?.value.trim()
@@ -229,6 +235,18 @@ const exeFileClickHandler = async (target: HTMLInputElement | undefined): Promis
   if (titleInput.value && titleInput.value.value.trim().length <= 0) {
     titleInput.value.value = await window.api.getFileNameByPath(target.value)
   }
+
+  // Duplicate Check
+  const duplicate = allItems.value.find(
+    (item) => item.exeFile?.realPath.toLowerCase() === path.toLowerCase()
+  )
+  if (duplicate && duplicate.id !== props.item?.id) {
+    isDuplicateExe.value = true
+    duplicateItemTitle.value = duplicate.title
+  } else {
+    isDuplicateExe.value = false
+    duplicateItemTitle.value = ''
+  }
 }
 
 const selectCategory = (category: CategoryEntity): void => {
@@ -333,6 +351,10 @@ const submit = async (
             <button class="file-find-btn">
               <i class="pi pi-folder" />
             </button>
+          </div>
+          <div v-if="isDuplicateExe" class="duplicate-warning">
+            <i class="pi pi-exclamation-triangle" />
+             이미 [{{ duplicateItemTitle }}] 항목에 등록된 파일입니다.
           </div>
         </div>
       </div>
@@ -554,5 +576,15 @@ button:hover {
 
 .recommend-btn:hover {
   filter: brightness(1.1);
+}
+
+.duplicate-warning {
+  color: #ff5e5e;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
 }
 </style>

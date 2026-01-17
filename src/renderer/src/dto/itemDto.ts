@@ -14,4 +14,6 @@ export interface ItemDto {
   categories: CategoryEntity[]
   kinds: KindEntity[]
   isFavorite: boolean
+  createdAt: Date
+  updatedAt: Date
 }

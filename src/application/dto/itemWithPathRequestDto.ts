@@ -12,4 +12,6 @@ export interface ItemWithPathRequestDto {
   categoryIds: number[]
   kindIds: number[]
   isFavorite: boolean
+  createdAt: Date
+  updatedAt: Date
 }

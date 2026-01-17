@@ -9,4 +9,6 @@ export interface Item {
   categoryIds: number[]
   kindIds: number[]
   isFavorite: boolean
+  createdAt: Date
+  updatedAt: Date
 }

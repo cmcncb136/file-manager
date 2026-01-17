@@ -7,17 +7,21 @@ import { CategoryEntity } from '../../../entity/categoryEntity'
 import { KindEntity } from '../../../entity/kindEntity'
 import { storeToRefs } from 'pinia'
 import { useItemFilterStore } from '@renderer/stores/useItemFilterStore'
+import { useItemStore } from '@renderer/stores/useItemStore'
 import ExtendSearch from '@renderer/components/ExtendSearch.vue'
 
 const categoryStore = useCategoryStore()
 const kindStore = useKindStore()
 const modalStore = useModalStore()
 const itemFilterStore = useItemFilterStore()
+const itemStore = useItemStore()
 
 const { open } = modalStore
 const { selectedCategoryIds, selectedKindIds, searchKeyword } = storeToRefs(itemFilterStore)
 const { kinds } = storeToRefs(kindStore)
 const { categories } = storeToRefs(categoryStore)
+const { sortBy, sortOrder } = storeToRefs(itemStore)
+const { setSort } = itemStore
 
 const kindSearchText = ref<string>('')
 const categorySearchText = ref<string>('')
@@ -91,6 +95,32 @@ const categorySearchEnterHandler = async (): Promise<void> => {
 <template>
   <div class="main-container">
     <div class="search-container">
+      <div class="sort-container">
+        <div class="sort-select-wrapper">
+          <i class="pi pi-filter sort-icon" />
+          <select
+            :value="sortBy"
+            @change="(e) => setSort((e.target as HTMLSelectElement).value as any)"
+            class="sort-select"
+          >
+            <option value="updatedAt">수정일</option>
+            <option value="title">제목</option>
+            <option value="createdAt">생성일</option>
+            <option value="isFavorite">즐겨찾기</option>
+          </select>
+        </div>
+        <button
+          @click="setSort(sortBy, sortOrder === 'asc' ? 'desc' : 'asc')"
+          class="sort-order-button control-button"
+          :title="sortOrder === 'asc' ? '오름차순' : '내림차순'"
+        >
+          <i
+            :class="sortOrder === 'asc' ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'"
+            class="order-icon"
+          />
+        </button>
+      </div>
+
       <input v-model="searchText" type="text" />
       <button class="search-button control-button">
         <i class="pi pi-search" />
@@ -293,5 +323,66 @@ input {
 
 button:hover {
   filter: brightness(0.8);
+}
+
+.sort-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 35px;
+  background-color: var(--input-bg-color);
+  padding-inline: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.sort-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline: 4px;
+}
+
+.sort-icon {
+  font-size: 0.8rem;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.sort-select {
+  height: 28px;
+  border: none;
+  background-color: transparent;
+  color: var(--text-color);
+  font-size: 0.85rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  padding-inline-end: 4px;
+}
+
+.sort-order-button {
+  background-color: var(--btn-bg-color);
+  color: var(--text-color);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.sort-order-button:hover {
+  background-color: var(--link-color);
+  color: white;
+  border-color: var(--link-color);
+}
+
+.order-icon {
+  font-size: 0.9rem;
 }
 </style>

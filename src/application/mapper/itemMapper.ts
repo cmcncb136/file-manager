@@ -22,7 +22,9 @@ export class ItemMapper {
       deleted: itemEntity.deleted,
       categoryIds: categoryIds ? categoryIds : [],
       kindIds: kindIds ? kindIds : [],
-      isFavorite: itemEntity.isFavorite
+      isFavorite: itemEntity.isFavorite,
+      createdAt: itemEntity.createdAt,
+      updatedAt: itemEntity.updatedAt
     }
   }
 
@@ -95,7 +97,9 @@ export class ItemMapper {
       deleted: item.deleted,
       categoryIds: item.categoryIds,
       kindIds: item.kindIds,
-      isFavorite: item.isFavorite
+      isFavorite: item.isFavorite,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt
     }
   }
 }
