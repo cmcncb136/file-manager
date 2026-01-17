@@ -4,6 +4,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 // Custom APIs for renderer
 const api = {
   selectImage: () => ipcRenderer.invoke('select-image'),
+  selectVideo: () => ipcRenderer.invoke('select-video'),
   selectFile: () => ipcRenderer.invoke('select-file'),
   selectFolder: () => electron.ipcRenderer.invoke('select-folder'),
   getFolderByPath: (targetPath: string) => ipcRenderer.invoke('get-folder', { targetPath }),

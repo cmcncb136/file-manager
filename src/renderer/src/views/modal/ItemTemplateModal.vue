@@ -9,6 +9,8 @@ import CategorySelectBox from '@renderer/components/CategorySelectBox.vue'
 import { ItemDto } from '@renderer/dto/itemDto'
 import { SaveItemDto } from '@renderer/dto/saveItemDto'
 import RecommendationModal from '@renderer/views/modal/RecommendationModal.vue'
+import VideoFrameModal from '@renderer/views/modal/VideoFrameModal.vue'
+import { extractFrames } from '@renderer/utils/videoFrameExtractor'
 
 const emit = defineEmits<{
   (e: 'submit', value: SaveItemDto): void
@@ -44,29 +46,98 @@ const selectedCategorySet = ref<Set<CategoryEntity>>(new Set<CategoryEntity>())
 
 const isRecommendationModalOpen = ref(false)
 const recommendationQuery = ref('')
+const recommendationSuggestions = ref<string[]>([])
 
-const openRecommendation = () => {
+const isVideoModalOpen = ref(false)
+const videoFrames = ref<string[]>([])
+const isVideoLoading = ref(false)
+const videoPath = ref<string>('')
+
+const openRecommendation = async (): Promise<void> => {
   const currentTitle = titleInput.value?.value.trim()
+  const rootPath = rootPathInput.value?.value.trim()
+  
+  const suggestions: string[] = []
+  
   if (currentTitle) {
     recommendationQuery.value = currentTitle
+    suggestions.push(currentTitle)
+  }
+  
+  if (rootPath) {
+    try {
+      // Get current folder name
+      const folderName = await (window.api.getFileNameByPath(rootPath) as Promise<string>)
+      if (folderName) suggestions.push(folderName)
+      
+      // Get parent folder name
+      const parentPath = await (window.api.getFolderByPath(rootPath) as Promise<string>)
+      if (parentPath) {
+        const parentName = await (window.api.getFileNameByPath(parentPath) as Promise<string>)
+        if (parentName) suggestions.push(parentName)
+      }
+    } catch (err) {
+      console.error('Failed to extract path suggestions', err)
+    }
+  }
+
+  if (suggestions.length > 0) {
+    recommendationSuggestions.value = [...new Set(suggestions)]
     isRecommendationModalOpen.value = true
   } else {
-    alert('이미지 추천을 위해 제목을 입력해주세요.')
+    alert('이미지 추천을 위해 제목 또는 경로가 필요합니다.')
   }
 }
 
-const onImageSelected = async (url: string) => {
+const onImageSelected = async (url: string): Promise<void> => {
   isRecommendationModalOpen.value = false
   try {
-    const savedPath = await window.api.callService('ImageRecommendationService', 'downloadImage', [
+    const savedPath = await (window.api.callService('ImageRecommendationService', 'downloadImage', [
       url
-    ])
+    ]) as Promise<string>)
     mainImgPath.value = savedPath
     const previewUrl = encodeURI(savedPath.replace(/\\/g, '/'))
     mainImg.value = 'file://' + previewUrl
   } catch (err) {
     console.error('Failed to download image', err)
     alert('이미지 다운로드에 실패했습니다.')
+  }
+}
+
+const onVideoSelectHandler = async () => {
+  if (window.api) {
+    const path = await window.api.selectVideo()
+    if (!path) return
+
+    videoPath.value = path
+    isVideoModalOpen.value = true
+    isVideoLoading.value = true
+    videoFrames.value = []
+
+    try {
+      const frames = await extractFrames(path, 20)
+      videoFrames.value = frames
+    } catch (err) {
+      console.error('Failed to extract frames', err)
+      alert('영상 프레임 추출에 실패했습니다.')
+      isVideoModalOpen.value = false
+    } finally {
+      isVideoLoading.value = false
+    }
+  }
+}
+
+const onFrameSelected = async (base64Data: string) => {
+  isVideoModalOpen.value = false
+  try {
+    const savedPath = await (window.api.callService('ImageRecommendationService', 'saveBase64Image', [
+      base64Data
+    ]) as Promise<string>)
+    mainImgPath.value = savedPath
+    mainImg.value = base64Data // Use base64 directly for immediate preview
+  } catch (err) {
+    console.error('Failed to save frame', err)
+    alert('프레임 저장에 실패했습니다.')
   }
 }
 
@@ -220,9 +291,12 @@ const submit = async (
         />
       </div>
 
-      <div class="setting-left-box">
+      <div class="setting-left-box" style="display: flex; gap: 5px; flex-direction: column;">
         <button @click="selectFileHandler" ref="mainImgLabel" class="input-file-main-image">
           {{ MAIN_IMAGE_NULL_LABEL_MSG }}
+        </button>
+        <button @click="onVideoSelectHandler" class="input-file-main-image">
+          동영상에서 선택
         </button>
       </div>
     </div>
@@ -235,8 +309,18 @@ const submit = async (
       <RecommendationModal
         v-if="isRecommendationModalOpen"
         :query="recommendationQuery"
+        :suggested-queries="recommendationSuggestions"
         @select="onImageSelected"
         @close="isRecommendationModalOpen = false"
+      />
+
+      <VideoFrameModal
+        v-if="isVideoModalOpen"
+        :video-path="videoPath"
+        :frames="videoFrames"
+        :loading="isVideoLoading"
+        @select="onFrameSelected"
+        @close="isVideoModalOpen = false"
       />
 
       <div class="setting-right-box" @click="exeFileClickHandler(exePathInput)">

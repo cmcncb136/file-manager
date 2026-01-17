@@ -4,6 +4,7 @@ import ModalTemplate from './ModalTemplate.vue'
 
 const props = defineProps<{
   query: string
+  suggestedQueries?: string[]
 }>()
 
 const emit = defineEmits<{
@@ -67,6 +68,20 @@ const handleKeydown = (e: KeyboardEvent): void => {
             <i v-if="loading" class="pi pi-spin pi-spinner" />
             <span v-else>Search</span>
           </button>
+        </div>
+        
+        <div v-if="suggestedQueries && suggestedQueries.length > 0" class="suggestions">
+          <span class="suggestion-label">Suggestions:</span>
+          <div class="suggestion-chips">
+            <button 
+              v-for="term in suggestedQueries" 
+              :key="term" 
+              class="suggestion-chip"
+              @click="searchQuery = term; performSearch()"
+            >
+              {{ term }}
+            </button>
+          </div>
         </div>
       </div>
       
@@ -202,6 +217,49 @@ const handleKeydown = (e: KeyboardEvent): void => {
 .search-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.suggestions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.suggestion-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #888;
+  white-space: nowrap;
+}
+
+.suggestion-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.suggestion-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(100, 108, 255, 0.1);
+  border: 1px solid rgba(100, 108, 255, 0.2);
+  color: #a0a4ff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.suggestion-chip:hover {
+  background: rgba(100, 108, 255, 0.2);
+  border-color: #646cff;
+  transform: translateY(-1px);
+}
+
+.suggestion-chip:active {
+  transform: translateY(0);
 }
 
 .content {

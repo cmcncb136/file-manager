@@ -69,6 +69,16 @@ function createWindow(): void {
     return filePaths[0]
   })
 
+  ipcMain.handle('select-video', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: [{ name: 'video', extensions: ['mp4', 'mkv', 'avi', 'webm'] }]
+    })
+
+    if (canceled) return null
+    return filePaths[0]
+  })
+
   ipcMain.handle('select-folder', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory']

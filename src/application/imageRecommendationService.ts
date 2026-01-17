@@ -30,4 +30,16 @@ export class ImageRecommendationService {
     // Return absolute temp path so ImageMappingService can process it normally
     return tempPath
   }
+
+  async saveBase64Image(base64Data: string): Promise<string> {
+    const base64Content = base64Data.split(';base64,').pop()
+    if (!base64Content) throw new Error('Invalid base64 data')
+    
+    const buffer = Buffer.from(base64Content, 'base64')
+    const fileName = `${uuidv4()}.jpg`
+    const tempPath = path.join(os.tmpdir(), fileName)
+    
+    await fs.promises.writeFile(tempPath, buffer)
+    return tempPath
+  }
 }
