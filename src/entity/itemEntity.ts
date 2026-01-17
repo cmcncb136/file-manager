@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
 @Entity('item')
 export class ItemEntity {
@@ -22,6 +22,15 @@ export class ItemEntity {
 
   @Column('boolean', { default: false })
   deleted!: boolean
+
+  @CreateDateColumn()
+  createdAt!: Date
+
+  @UpdateDateColumn()
+  updatedAt!: Date
+
+  @Column('boolean', { default: false })
+  isFavorite!: boolean
 }
 
 @Entity('item_and_category')

@@ -2,15 +2,18 @@
 import { ItemDto } from '@renderer/dto/itemDto'
 import { onMounted, ref, watch } from 'vue'
 import noImage from '/src/assets/no_img_square.png'
+import { useItemStore } from '@renderer/stores/useItemStore'
 import { useModalStore } from '@renderer/stores/useModalStore'
 import { useItemFilterStore } from '@renderer/stores/useItemFilterStore'
 import { storeToRefs } from 'pinia'
 
+const itemStore = useItemStore()
 const modalStore = useModalStore()
 const itemFilterStore = useItemFilterStore()
 
 const { open } = modalStore
 const { selectedCategoryIds, selectedKindIds } = storeToRefs(itemFilterStore)
+const { toggleFavorite } = itemStore
 
 const showImg = ref<string>(noImage)
 const props = defineProps<{
@@ -101,6 +104,13 @@ watch(
           @click.stop="() => openFile(props.item.rootFile?.id)"
         >
           <i class="pi pi-folder" />
+        </button>
+        <button
+          :style="{ 'background-color': props.item.isFavorite ? '#ff4d4d' : '#cccccc' }"
+          class="control-button"
+          @click.stop="toggleFavorite(props.item.id)"
+        >
+          <i :class="props.item.isFavorite ? 'pi pi-heart-fill' : 'pi pi-heart'" />
         </button>
         <button
           style="background-color: #008cff"

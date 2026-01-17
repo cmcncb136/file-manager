@@ -25,4 +25,8 @@ export class ItemRepo {
   async save(Item: ItemEntity): Promise<ItemEntity> {
     return await this.ItemRepository.save(Item)
   }
+
+  async update(id: number, partialItem: Partial<ItemEntity>): Promise<void> {
+    await this.ItemRepository.update(id, partialItem)
+  }
 }

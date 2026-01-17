@@ -104,7 +104,7 @@ const onImageSelected = async (url: string): Promise<void> => {
   }
 }
 
-const onVideoSelectHandler = async () => {
+const onVideoSelectHandler = async (): Promise<void> => {
   if (window.api) {
     const path = await window.api.selectVideo()
     if (!path) return
@@ -127,12 +127,14 @@ const onVideoSelectHandler = async () => {
   }
 }
 
-const onFrameSelected = async (base64Data: string) => {
+const onFrameSelected = async (base64Data: string): Promise<void> => {
   isVideoModalOpen.value = false
   try {
-    const savedPath = await (window.api.callService('ImageRecommendationService', 'saveBase64Image', [
-      base64Data
-    ]) as Promise<string>)
+    const savedPath = (await window.api.callService(
+      'ImageRecommendationService',
+      'saveBase64Image',
+      [base64Data]
+    )) as string
     mainImgPath.value = savedPath
     mainImg.value = base64Data // Use base64 directly for immediate preview
   } catch (err) {
@@ -163,7 +165,7 @@ onMounted(async () => {
   if (item.description != null) description.value = item.description
 })
 
-const moveBottomScroll = async () => {
+const moveBottomScroll = (): void => {
   if (modalBodyRight.value) modalBodyRight.value.scrollTop = modalBodyRight.value.scrollHeight
 }
 
@@ -173,7 +175,7 @@ watch(mainImgPath, () => {
   mainImgLabel.value.innerHTML = mainImgPath.value
 })
 
-const selectFileHandler = async () => {
+const selectFileHandler = async (): Promise<void> => {
   if (window.api) {
     const path = await window.api.selectImage()
     if (!path) return
@@ -186,7 +188,7 @@ const selectFileHandler = async () => {
   }
 }
 
-const addCategory = (category: string) => {
+const addCategory = (category: string): void => {
   if (category.trim().length <= 0) return
   if (categories.value.filter((it) => it.name.toLowerCase() === category.toLowerCase()).length > 0)
     return
@@ -295,7 +297,7 @@ const submit = async (
         <button @click="selectFileHandler" ref="mainImgLabel" class="input-file-main-image">
           {{ MAIN_IMAGE_NULL_LABEL_MSG }}
         </button>
-        <button @click="onVideoSelectHandler" class="input-file-main-image">
+        <button class="input-file-main-image" @click="onVideoSelectHandler">
           동영상에서 선택
         </button>
       </div>
@@ -353,9 +355,9 @@ const submit = async (
           <div class="kind-line-box">
             <div v-for="kind in kinds" :key="kind.id!">
               <input
+                :id="String(kind.id!)"
                 v-model="selectedKindList"
                 type="checkbox"
-                :id="String(kind.id!)"
                 :value="kind.id!"
                 hidden
               />

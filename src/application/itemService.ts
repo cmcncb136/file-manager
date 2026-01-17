@@ -221,4 +221,15 @@ export class ItemService {
 
     return this.createItem(itemEntities, kindEntities, categoryEntities)
   }
+
+  async toggleFavorite(id: number): Promise<Item | null> {
+    const item = await this.findById(id)
+    if (!item) return null
+
+    const newFavoriteStatus = !item.isFavorite
+    await this.itemRepo.update(id, { isFavorite: newFavoriteStatus })
+
+    item.isFavorite = newFavoriteStatus
+    return item
+  }
 }

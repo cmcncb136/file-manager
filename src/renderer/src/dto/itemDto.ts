@@ -13,4 +13,5 @@ export interface ItemDto {
   deleted: boolean
   categories: CategoryEntity[]
   kinds: KindEntity[]
+  isFavorite: boolean
 }

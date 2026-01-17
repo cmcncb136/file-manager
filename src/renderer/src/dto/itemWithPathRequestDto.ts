@@ -11,4 +11,5 @@ export interface ItemWithPathRequestDto {
   deleted: boolean
   categoryIds: number[]
   kindIds: number[]
+  isFavorite: boolean
 }

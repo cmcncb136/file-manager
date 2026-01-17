@@ -4,6 +4,7 @@ declare global {
   interface Window {
     api: {
       selectImage: () => Promise<string>
+      selectVideo: () => Promise<string>
       selectFile: () => Promise<string>
       selectFolder: () => Promise<string>
       getFolderByPath: (targetPath: string) => Promise<string>

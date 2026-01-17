@@ -39,7 +39,8 @@ export const useItemStore = defineStore('item', () => {
         }),
         kinds: item.kindIds.map((kindId) => {
           return kindMap.value.get(kindId)
-        })
+        }),
+        isFavorite: item.isFavorite
       } as ItemDto
     })
   })
@@ -115,6 +116,27 @@ export const useItemStore = defineStore('item', () => {
     }
   }
 
+  const toggleFavorite = async (id: number): Promise<void> => {
+    try {
+      await window.api.callService('ItemService', 'toggleFavorite', [id])
+      const itemWithPath = (await window.api.callService('ItemService', 'findItemWithPathById', [
+        id
+      ])) as ItemWithPathRequestDto
+
+      const index = rawItems.value.findIndex((it) => it.id === id)
+      if (index > -1) {
+        rawItems.value = rawItems.value.with(index, itemWithPath)
+      }
+    } catch (err: never | unknown) {
+      if (err instanceof Error) {
+        console.error(err.message)
+        error.value = err.message
+      } else {
+        error.value = 'unknown error'
+      }
+    }
+  }
+
   const initialize = async (): Promise<void> => {
     if (initialized) return
 
@@ -131,6 +153,7 @@ export const useItemStore = defineStore('item', () => {
     items,
     saveItem,
     updateItem,
+    toggleFavorite,
     initialize
   }
 })

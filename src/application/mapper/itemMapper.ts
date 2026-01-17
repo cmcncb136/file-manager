@@ -21,7 +21,8 @@ export class ItemMapper {
       rootFileRefId: itemEntity.rootFileRefId,
       deleted: itemEntity.deleted,
       categoryIds: categoryIds ? categoryIds : [],
-      kindIds: kindIds ? kindIds : []
+      kindIds: kindIds ? kindIds : [],
+      isFavorite: itemEntity.isFavorite
     }
   }
 
@@ -40,7 +41,8 @@ export class ItemMapper {
       rootFileRefId: rootFileRefEntity?.id ?? null,
       deleted: false,
       categoryIds: saveItemDto.categoryIds,
-      kindIds: saveItemDto.kindIds
+      kindIds: saveItemDto.kindIds,
+      isFavorite: false
     } as Item
   }
 
@@ -59,7 +61,8 @@ export class ItemMapper {
       rootFileRefId: rootFileRefEntity?.id ?? null,
       deleted: false,
       categoryIds: updateItemDto.categoryIds,
-      kindIds: updateItemDto.kindIds
+      kindIds: updateItemDto.kindIds,
+      isFavorite: false // Update usually doesn't reset favorite, but let's be careful with domain types
     } as Item
   }
 
@@ -71,8 +74,9 @@ export class ItemMapper {
       mainImgId: item.mainImgId,
       exeFileRefId: item.exeFileRefId,
       rootFileRefId: item.rootFileRefId,
-      deleted: item.deleted
-    }
+      deleted: item.deleted,
+      isFavorite: item.isFavorite
+    } as ItemEntity
   }
 
   static toItemWithPathRequestDto(
@@ -90,7 +94,8 @@ export class ItemMapper {
       rootFile: rootFile,
       deleted: item.deleted,
       categoryIds: item.categoryIds,
-      kindIds: item.kindIds
+      kindIds: item.kindIds,
+      isFavorite: item.isFavorite
     }
   }
 }

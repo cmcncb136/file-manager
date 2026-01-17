@@ -8,4 +8,5 @@ export interface Item {
   deleted: boolean
   categoryIds: number[]
   kindIds: number[]
+  isFavorite: boolean
 }
