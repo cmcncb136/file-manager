@@ -12,13 +12,18 @@ import { ItemService } from '../application/itemService'
 import { FileRefService } from '../application/fileRefService'
 import path from 'node:path'
 import * as fs from 'node:fs'
+import { GoogleImageService } from '../application/googleImageService'
+import { ImageRecommendationService } from '../application/imageRecommendationService'
+
+container.register('ExternalImageService', { useClass: GoogleImageService })
 
 const services = {
   CategoryService: container.resolve(CategoryService),
   ImageMappingService: container.resolve(ImageMappingService),
   KindService: container.resolve(KindService),
   ItemService: container.resolve(ItemService),
-  FileRefService: container.resolve(FileRefService)
+  FileRefService: container.resolve(FileRefService),
+  ImageRecommendationService: container.resolve(ImageRecommendationService)
 }
 
 function createWindow(): void {

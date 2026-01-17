@@ -8,6 +8,7 @@ import { CategoryEntity } from '../../../../entity/categoryEntity'
 import CategorySelectBox from '@renderer/components/CategorySelectBox.vue'
 import { ItemDto } from '@renderer/dto/itemDto'
 import { SaveItemDto } from '@renderer/dto/saveItemDto'
+import RecommendationModal from '@renderer/views/modal/RecommendationModal.vue'
 
 const emit = defineEmits<{
   (e: 'submit', value: SaveItemDto): void
@@ -40,6 +41,34 @@ const selectedKindList = ref<number[]>(props.item?.kinds.map((it) => it.id!) ?? 
 
 const modalBodyRight = ref<HTMLElement>()
 const selectedCategorySet = ref<Set<CategoryEntity>>(new Set<CategoryEntity>())
+
+const isRecommendationModalOpen = ref(false)
+const recommendationQuery = ref('')
+
+const openRecommendation = () => {
+  const currentTitle = titleInput.value?.value.trim()
+  if (currentTitle) {
+    recommendationQuery.value = currentTitle
+    isRecommendationModalOpen.value = true
+  } else {
+    alert('이미지 추천을 위해 제목을 입력해주세요.')
+  }
+}
+
+const onImageSelected = async (url: string) => {
+  isRecommendationModalOpen.value = false
+  try {
+    const savedPath = await window.api.callService('ImageRecommendationService', 'downloadImage', [
+      url
+    ])
+    mainImgPath.value = savedPath
+    const previewUrl = encodeURI(savedPath.replace(/\\/g, '/'))
+    mainImg.value = 'file://' + previewUrl
+  } catch (err) {
+    console.error('Failed to download image', err)
+    alert('이미지 다운로드에 실패했습니다.')
+  }
+}
 
 onMounted(async () => {
   const item = props.item
@@ -87,7 +116,7 @@ const selectFileHandler = async () => {
 }
 
 const addCategory = (category: string) => {
-  if(category.trim().length <= 0) return
+  if (category.trim().length <= 0) return
   if (categories.value.filter((it) => it.name.toLowerCase() === category.toLowerCase()).length > 0)
     return
   saveCategory(category)
@@ -200,7 +229,15 @@ const submit = async (
     <div ref="modalBodyRight" class="modal-body-right">
       <div class="setting-right-box">
         <input ref="titleInput" class="input-box" id="title" placeholder="title" type="text" />
+        <button class="recommend-btn" @click="openRecommendation">이미지 추천</button>
       </div>
+
+      <RecommendationModal
+        v-if="isRecommendationModalOpen"
+        :query="recommendationQuery"
+        @select="onImageSelected"
+        @close="isRecommendationModalOpen = false"
+      />
 
       <div class="setting-right-box" @click="exeFileClickHandler(exePathInput)">
         <div style="display: flex; flex-direction: column; width: 100%">
@@ -415,5 +452,21 @@ button:hover {
   color: var(--text-color);
   padding: 10px;
   outline: none;
+}
+
+.recommend-btn {
+  background-color: var(--link-color);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.recommend-btn:hover {
+  filter: brightness(1.1);
 }
 </style>
