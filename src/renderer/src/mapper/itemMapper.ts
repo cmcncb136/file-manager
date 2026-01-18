@@ -21,7 +21,10 @@ export class ItemMapper {
       rootFile: rootFile,
       deleted: item.deleted,
       categoryIds: item.categoryIds,
-      kindIds: item.kindIds
+      kindIds: item.kindIds,
+      createdAt: item.createdAt,
+      isFavorite: item.isFavorite,
+      updatedAt: item.updatedAt
     }
   }
 
