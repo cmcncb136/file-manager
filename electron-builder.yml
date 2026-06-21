@@ -1,5 +1,7 @@
 appId: com.electron.app
 productName: vue-electron-file-manager
+asar: false
+afterPack: build/afterPack.js
 directories:
   buildResources: build
 files:
